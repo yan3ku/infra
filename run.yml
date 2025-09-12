@@ -1,0 +1,50 @@
+---
+- hosts: deusex
+  become: yes
+  roles:
+    - role: system
+  #   - geerlingguy.docker
+
+    # - name: Install Samba
+    #   package:
+    #     name: samba
+    #     state: present
+
+    # - name: Ensure smbd is started
+    #   service:
+    #     name: smbd
+    #     state: started
+    #     enabled: yes
+
+    # - name: Install pip
+    #   package:
+    #     name: python3-pip
+    #     state: present
+
+    # - name: Install git
+    #   package:
+    #     name: git
+    #     state: present
+
+    # - name: Install xfs
+    #   package:
+    #     name: xfsprogs
+    #     state: present
+
+    # - name: Install emacs
+    #   package:
+    #     name: emacs
+    #     state: present
+
+    # - name: Install stow
+    #   package:
+    #     name: stow
+    #     state: present
+
+    # - name: Add cron backup job
+    #   ansible.builtin.cron:
+    #     name: "Daily backup"
+    #     minute: "0"
+    #     hour: "2"
+    #     job: "/usr/local/bin/backup.sh"
+    #     user: root

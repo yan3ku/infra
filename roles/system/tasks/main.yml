@@ -1,0 +1,9 @@
+n---
+- include_tasks: pool.yml
+- include_tasks: user.yml
+- name: test
+  debug:
+    var: user_conf_dir
+# - include_tasks: user.yaml
+# - include_tasks: cron.yaml
+# - include_tasks: docker-backup.yaml

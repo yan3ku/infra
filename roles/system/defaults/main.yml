@@ -1,0 +1,21 @@
+dotenv: "{{ playbook_dir + '/docker-config/.env' }}"
+
+shell:    /bin/bash
+username: yaneko
+password: "{{ lookup('dotenv', 'PASSWORD', file=dotenv) }}"
+
+user_home_dir:      "{{ lookup('dotenv', 'HOMEDIR', file=dotenv) }}"
+docker_config_dir:  "{{ lookup('dotenv', 'CONFDIR', file=dotenv) }}"
+docker_backup_dir:  "{{ lookup('dotenv', 'BACKDIR', file=dotenv) }}"
+server_data_dir:    "{{ lookup('dotenv', 'DATADIR', file=dotenv) }}"
+
+user_conf_repo: git@github.com:yan3ku/config.git
+user_conf_dir: "{{ user_home_dir }}/{{ user_conf_repo | regex_search('/(.*)\\.git$', '\\1') | first }}"
+
+packages:
+  - emacs
+  - htop
+  - stow
+  - tmux
+  - xfsprogs
+  - mergerfs

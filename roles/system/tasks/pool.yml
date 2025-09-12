@@ -1,0 +1,56 @@
+- name: Ensure mergerfs is installed
+  package:
+    name: mergerfs
+    state: present
+
+- name: Get TANK disk labels
+  command: lsblk -o label
+  register: lsblk_output
+
+- name: Extract tank numbers
+  set_fact:
+    tank_numbers: >-
+      {{ lsblk_output.stdout_lines
+      | select('match', '^TANK[0-9]+$')
+      | map('regex_replace', '^TANK', '')
+      | list }}
+
+- name: Extracted tank numbers
+  debug:
+    var: tank_numbers
+
+- name: Create mount points for external storage
+  file:
+    path: "/mnt/tank{{ item }}"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0755'
+  loop: "{{ tank_numbers }}"
+
+- name: Ensure mergerfs mount point exists
+  file:
+    path: "/mnt/pool"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0755'
+
+- name: Mount each disk and add to fstab
+  mount:
+    path: "/mnt/tank{{ item }}"
+    src: "LABEL=TANK{{ item }}"
+    fstype: xfs
+    opts: defaults,noatime,nofail
+    state: mounted
+  loop:  "{{ tank_numbers }}"
+
+- name: Add mergerfs entry to fstab
+  lineinfile:
+    path: /etc/fstab
+    regexp: '^/mnt/tank\*.* /mnt/pool'
+    line: "/mnt/tank* /mnt/pool mergerfs allow_other,use_ino,cache.files=partial,dropcacheonclose=true,category.create=mfs 0 0"
+    create: yes
+
+- name: Mount mergerfs pool
+  command: mount /mnt/pool

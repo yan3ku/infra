@@ -1,0 +1,20 @@
+---
+- name: Install cron
+  package:
+    name: cron
+    state: present
+
+- name: Ensure cron service is up
+  service:
+    name: cron
+    state: started
+    enabled: yes
+
+- name: Add backup job
+  cron:
+      minute: "0"
+      hour: "0"
+      day: "*"
+      month: "*"
+      weekday: "0"  # 0 is Sunday
+      job: "/opt/docker/"
