@@ -1,3 +1,4 @@
+---
 - name: Ensure mergerfs is installed
   package:
     name: mergerfs
@@ -6,14 +7,14 @@
 - name: Get TANK disk labels
   command: lsblk -o label
   register: lsblk_output
+  changed_when: false
 
 - name: Extract tank numbers
   set_fact:
-    tank_numbers: >-
-      {{ lsblk_output.stdout_lines
-      | select('match', '^TANK[0-9]+$')
-      | map('regex_replace', '^TANK', '')
-      | list }}
+    tank_numbers: "{{ lsblk_output.stdout_lines
+    | select('match', '^TANK[0-9]+$')
+    | map('regex_replace', '^TANK', '')
+    | list }}"
 
 - name: Extracted tank numbers
   debug:
@@ -45,12 +46,10 @@
     state: mounted
   loop:  "{{ tank_numbers }}"
 
-- name: Add mergerfs entry to fstab
-  lineinfile:
-    path: /etc/fstab
-    regexp: '^/mnt/tank\*.* /mnt/pool'
-    line: "/mnt/tank* /mnt/pool mergerfs allow_other,use_ino,cache.files=partial,dropcacheonclose=true,category.create=mfs 0 0"
-    create: yes
-
 - name: Mount mergerfs pool
-  command: mount /mnt/pool
+  mount:
+    path: "/mnt/pool"
+    src: "/mnt/tank*"
+    fstype: mergerfs
+    opts: allow_other,use_ino,cache.files=partial,dropcacheonclose=true,category.create=mfs
+    state: mounted

@@ -1,0 +1,139 @@
+---
+- name: Get {{ username }} passwd entry
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ username }}"
+- set_fact:
+    user_home: "{{ getent_passwd[username][4] }}"   # 5th field is home dir
+
+- name: Move user home directory
+  when: user_home != HOMEDIR
+  block:
+    - name: Create user home directory
+      file:
+        state: directory
+        path: "{{ HOMEDIR }}"
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        mode: "0755"
+
+    - name: Sync old home to new home
+      synchronize:
+        src: "/home/{{ username }}/"
+        dest: "{{ HOMEDIR }}/"
+        archive: yes
+      delegate_to: "{{ inventory_hostname }}"
+
+    - name: Replace home path for {{ username }} in /etc/passwd
+      replace:
+        path: /etc/passwd
+        regexp: '/home/{{ username }}'
+        replace: '{{ HOMEDIR }}'
+
+    - name: Remove old home directory
+      file:
+        path: "/home/{{ username }}"
+        state: absent
+
+    - name: Create main user with new home directory
+      user:
+        name: "{{ username }}"
+        password: "{{ password | password_hash('sha512') }}"
+        home: "{{ HOMEDIR }}"
+        groups:
+          - sudo
+          - users
+        append: yes
+        shell: "{{ shell }}"
+        update_password: on_create
+
+    # changing home directory like this breaks gpg agent
+    # the only solution for now that worked is rebooting...
+    - name: Reboot the server
+      reboot:
+        msg: "Reboot initiated by Ansible"
+        reboot_timeout: 300
+
+    # - name: Restart gpg agent
+    #   shell: gpgconf --kill gpg-agent
+    #   become: yes
+
+# - name: Reset SSH connection to refresh user info
+#   meta: reset_connection
+
+- name: Allow passwordless sudo
+  copy:
+    dest: "/etc/sudoers.d/{{ username }}"
+    content: "{{ username }} ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: root
+    mode: '0440'
+
+- name: Ensure .ssh directory exists
+  file:
+    path: "{{ HOMEDIR }}/.ssh"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0700'
+
+- name: Add SSH public key to authorized_keys
+  authorized_key:
+    user: "{{ username }}"
+    key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+    state: present
+
+- name: Copy private SSH key
+  copy:
+    src: "~/.ssh/id_ed25519"
+    dest: "{{ HOMEDIR }}/.ssh/id_ed25519"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0600'
+
+- name: Check if GPG key exists
+  shell: "gpg -k {{ username }}"
+  register: gpg_check
+  become: no
+  failed_when: false
+  changed_when: false
+  ignore_errors: yes
+
+- name: Import gpg keys
+  when: gpg_check.rc != 0
+  block:
+    - name: Export GPG key on control node
+      shell: "gpg --batch --export-secret-key --armor {{ username }}"
+      register: gpg_key_export
+      delegate_to: localhost
+      become: no
+
+    - name: Import private GPG key
+      shell:
+        cmd: "gpg --batch --import"
+      become: no
+      args:
+        stdin: "{{ gpg_key_export.stdout }}"
+
+
+- name: Ensure github.com is in known_hosts
+  known_hosts:
+    name: github.com
+    key: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}"
+    path: "{{ HOMEDIR }}/.ssh/known_hosts"
+    state: present
+  become: no
+
+- name: Clone config repo
+  git:
+    repo: '{{ USERGIT }}'
+    dest: "{{ USERCONF }}"
+    version: master
+    update: yes
+  become: no
+
+- name: Run .install script
+  command: "{{ USERCONF }}/.install"
+  args:
+    creates: "{{ USERCONF }}/.install.done"
+  become: no

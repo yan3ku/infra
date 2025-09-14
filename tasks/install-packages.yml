@@ -1,8 +1,4 @@
 ---
-- name: debug
-  debug:
-    var: CONFDIR
-
 - name: Update packages
   package:
     name: "*"

@@ -1,0 +1,34 @@
+---
+- name: Ensure the CONFDIR exists
+  stat:
+    path: "{{ CONFDIR }}"
+  register: confdir_stat
+
+- block:
+    - name: Ensure the CONFDIR exists
+      file:
+        path: "{{ CONFDIR }}"
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        state: directory
+        mode: '0755'
+
+    - name: Ensure source backup exists
+      stat:
+        path: "{{ BACKDIR }}/latest"
+      register: backup_stat
+
+    - name: Fail if source backup doesn't exist
+      fail:
+        msg: "The backup source directory does not exist: {{ BACKDIR }}/latest"
+      when: not backup_stat.stat.exists
+
+    - name: Sync the latest backup to CONFDIR
+      synchronize:
+        src: "{{ BACKDIR }}/latest/" # this slash is really important to "unpack" the directory
+        dest: "{{ CONFDIR }}"
+        archive: yes
+        recursive: yes
+      delegate_to: "{{ inventory_hostname }}"
+  when:
+    - not confdir_stat.stat.exists
