@@ -1,0 +1,26 @@
+- name: Run gengroupvars.sh to get user UID map
+  command: ./sysusers.sh
+  register: user_json
+  changed_when: false
+  delegate_to: localhost
+
+- name: Parse JSON into user_map
+  set_fact:
+    user_map: "{{ user_json.stdout | from_json }}"
+
+- name: Create system users with matching UID and GID
+  user:
+    name: "{{ item.key }}"
+    uid: "{{ item.value }}"
+    create_home: false
+    system: true
+    state: present
+  loop: "{{ user_map | dict2items }}"
+
+- name: Ensure groups exists
+  group:
+    name: "{{ item.key }}"
+    gid: "{{ item.value }}"
+    system: true
+    state: present
+  loop: "{{ user_map | dict2items }}"

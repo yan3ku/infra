@@ -41,25 +41,21 @@
         password: "{{ password | password_hash('sha512') }}"
         home: "{{ HOMEDIR }}"
         groups:
-          - sudo
           - users
+          - sudo
+          - docker
+          - media
         append: yes
         shell: "{{ shell }}"
         update_password: on_create
 
     # changing home directory like this breaks gpg agent
-    # the only solution for now that worked is rebooting...
+    # reseting connection nor restarting gpg agent fixes this
+    # only solution for now that worked is rebooting...
     - name: Reboot the server
       reboot:
         msg: "Reboot initiated by Ansible"
         reboot_timeout: 300
-
-    # - name: Restart gpg agent
-    #   shell: gpgconf --kill gpg-agent
-    #   become: yes
-
-# - name: Reset SSH connection to refresh user info
-#   meta: reset_connection
 
 - name: Allow passwordless sudo
   copy:
@@ -107,6 +103,9 @@
       register: gpg_key_export
       delegate_to: localhost
       become: no
+
+    - name: Create .gnupg
+      command: "gpg -k"
 
     - name: Import private GPG key
       shell:
