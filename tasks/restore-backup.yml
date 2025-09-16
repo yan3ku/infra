@@ -4,7 +4,9 @@
     path: "{{ CONFDIR }}"
   register: confdir_stat
 
-- block:
+- name: Restore backup
+  when: not confdir_stat.stat.exists
+  block:
     - name: Ensure the CONFDIR exists
       file:
         path: "{{ CONFDIR }}"
@@ -30,5 +32,3 @@
         archive: yes
         recursive: yes
       delegate_to: "{{ inventory_hostname }}"
-  when:
-    - not confdir_stat.stat.exists

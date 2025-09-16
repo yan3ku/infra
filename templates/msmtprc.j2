@@ -1,0 +1,16 @@
+defaults
+auth           on
+tls            on
+logfile        ~/.msmtp.log
+
+account        gmail
+host           smtp.gmail.com
+port           465
+tls_starttls   off
+from           {{ EMAIL }}
+user           {{ EMAIL }}
+
+passwordeval   /usr/bin/authget smtp.gmail.com {{ EMAIL }}
+aliases        /etc/aliases
+
+account default: gmail

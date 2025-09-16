@@ -81,7 +81,9 @@ class LookupModule(LookupBase):  # class name is not arbitrary, DO NOT CHANGE
         path = self.find_file_in_search_path(variables, "files", params["file"])
         if not path:
             raise AnsibleFileNotFound(f"Could not find file {params['file']}")
-        var_pattern = compile(r"^\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*=\s*(.*)")
+        # this regex strips beginning and ending double quotes
+        # should be safe unless the variable contains escaped quotes
+        var_pattern = compile(r"^\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*=\s*\"?([^\"\n]*)\"?")
         variables = {}
         for line in open(path, "rt").readlines():
             # Parse the dotenv file permissively, accepting valid NAME=VALUE

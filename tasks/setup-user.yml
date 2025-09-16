@@ -4,10 +4,17 @@
     database: passwd
     key: "{{ username }}"
 - set_fact:
-    user_home: "{{ getent_passwd[username][4] }}"   # 5th field is home dir
+    user_home: "{{ getent_passwd[username][4] }}"
+
+- name: debug
+  debug:
+    var: user_home
+
+- name: debug
+  debug:
+    var: HOMEDIR
 
 - name: Move user home directory
-  when: user_home != HOMEDIR
   block:
     - name: Create user home directory
       file:
@@ -56,6 +63,7 @@
       reboot:
         msg: "Reboot initiated by Ansible"
         reboot_timeout: 300
+  when: user_home != HOMEDIR
 
 - name: Allow passwordless sudo
   copy:
@@ -110,10 +118,16 @@
     - name: Import private GPG key
       shell:
         cmd: "gpg --batch --import"
-      become: no
       args:
         stdin: "{{ gpg_key_export.stdout }}"
+      become: no
 
+    - name: Import private GPG key (root)
+      shell:
+        cmd: "gpg --batch --import"
+      args:
+        stdin: "{{ gpg_key_export.stdout }}"
+      become: yes
 
 - name: Ensure github.com is in known_hosts
   known_hosts:
@@ -123,16 +137,65 @@
     state: present
   become: no
 
-- name: Clone config repo
-  git:
-    repo: '{{ USERGIT }}'
-    dest: "{{ USERCONF }}"
-    version: master
-    update: yes
-  become: no
+- name: Check if config exists
+  stat:
+    path: "{{ USERCONF }}"
+  register: config_stat
 
-- name: Run .install script
-  command: "{{ USERCONF }}/.install"
-  args:
-    creates: "{{ USERCONF }}/.install.done"
-  become: no
+- name: Install config
+  when: not config_stat.stat.exists
+  block:
+    - name: Clone config repo
+      git:
+        repo: '{{ USERGIT }}'
+        dest: "{{ USERCONF }}"
+        version: master
+        update: yes
+      become: no
+
+    - name: Run stow
+      shell:
+        cmd: stow -v -S --adopt --no-folding *
+        chdir: "{{ USERCONF }}"
+
+    - name: Reset adopted files
+      shell:
+        cmd: git reset --hard
+        chdir: "{{ USERCONF }}"
+
+- name: Deploy msmtprc
+  template:
+    src: templates/msmtprc.j2
+    dest: /etc/msmtprc
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Deploy authget
+  template:
+    src: templates/authget.j2
+    dest: /usr/bin/authget
+    owner: root
+    group: root
+    mode: '0755'
+
+
+- name: Add mail alias
+  lineinfile:
+    path: /etc/aliases
+    regexp: '^{{ username }}:'
+    line: '{{ username }}: {{ EMAIL }}'
+    create: yes
+
+- name: Add mail aliases
+  lineinfile:
+    path: /etc/aliases
+    regexp: '^{{ item.user }}:'
+    line: '{{ item.user }}: {{ item.email }}'
+    create: yes
+  loop:
+    - { user: '{{ username }}', email: '{{ EMAIL }}' }
+    - { user: 'root', email: '{{ EMAIL }}' }
+
+- name: Rebuild mail aliases
+  command: newaliases

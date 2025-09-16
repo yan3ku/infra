@@ -3,6 +3,7 @@ dotenv: "{{ playbook_dir + '/docker-config/.env' }}"
 shell:    /bin/bash
 username: yaneko
 password: "{{ lookup('dotenv', 'PASSWORD', file=dotenv) }}"
+EMAIL:    "{{ lookup('dotenv', 'EMAIL',    file=dotenv) }}"
 
 HOMEDIR:  "{{ lookup('dotenv', 'HOMEDIR', file=dotenv) }}"
 CONFDIR:  "{{ lookup('dotenv', 'CONFDIR', file=dotenv) }}"
@@ -13,11 +14,16 @@ USERGIT: git@github.com:yan3ku/config.git
 USERCONF: "{{ HOMEDIR }}/{{ USERGIT | regex_search('/(.*)\\.git$', '\\1') | first }}"
 
 packages:
-  - emacs
-  - htop
+  - git
+  - git-secret
   - stow
+  - emacs
   - tmux
   - xfsprogs
   - mergerfs
-  - git
-  - git-secret
+  - htop
+  - lm-sensors
+  - fancontrol
+  - msmtp
+  - msmtp-mta
+  - smartmontools
