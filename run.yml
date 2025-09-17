@@ -2,13 +2,6 @@
 - name: Setup server
   hosts: all
   become: yes
-  tasks:
-    - name: debug
-      debug:
-        var: password
-    # - include_tasks: tasks/install-packages.yml
-    # - include_tasks: tasks/create-sysusers.yml
-    # - include_tasks: tasks/merge-pool.yml
-    - include_tasks: tasks/setup-user.yml
-    # - include_tasks: tasks/restore-backup.yml
-    # - include_tasks: tasks/setup-cron.yml
+  roles:
+    - role: sys
+    - role: user

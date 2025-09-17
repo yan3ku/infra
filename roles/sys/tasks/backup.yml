@@ -1,17 +1,17 @@
 ---
-- name: Ensure the CONFDIR exists
+- name: Ensure {{ CONFDIR }} was already synced
   stat:
-    path: "{{ CONFDIR }}"
-  register: confdir_stat
+    path: "{{ CONFDIR }}/.synced"
+  register: was_synced
 
 - name: Restore backup
-  when: not confdir_stat.stat.exists
+  when: not was_synced.stat.exists
   block:
     - name: Ensure the CONFDIR exists
       file:
         path: "{{ CONFDIR }}"
         owner: "{{ username }}"
-        group: "{{ username }}"
+        group: "media"
         state: directory
         mode: '0755'
 
@@ -32,3 +32,15 @@
         archive: yes
         recursive: yes
       delegate_to: "{{ inventory_hostname }}"
+
+    - name: Create synced lock
+      file:
+        path: "{{ CONFDIR }}/.synced"
+        state: touch
+        mode: '0622'
+        owner: root
+        group: root
+
+- name: Include Docker role
+  include_role:
+    name: geerlingguy.docker

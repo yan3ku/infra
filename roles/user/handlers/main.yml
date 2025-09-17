@@ -1,0 +1,14 @@
+- name: rebuild aliases
+  command: newaliases
+
+- name: stow config
+  shell: stow -v -S --adopt --no-folding *
+  args:
+    chdir: "{{ USERCONF }}"
+  become: no
+
+- name: reset files adopted by stow
+  shell: git reset --hard
+  args:
+    chdir: "{{ USERCONF }}"
+  become: no

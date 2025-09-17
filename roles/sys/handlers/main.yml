@@ -1,0 +1,19 @@
+- name: restart sshd
+  service:
+    name: ssh
+    state: restarted
+
+- name: reload systemd
+  systemd_service:
+    daemon_reload: true
+
+- name: reload postfix
+  service:
+    name: postfix
+    state: reloaded
+
+- name: reconfigure postfix
+  command: dpkg-reconfigure -f noninteractive postfix
+
+- name: postmap
+  command: postmap /etc/postfix/sasl/passwd

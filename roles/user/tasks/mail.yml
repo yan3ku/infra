@@ -1,0 +1,19 @@
+# - name: Deploy msmtprc
+#   template:
+#     src: templates/msmtprc.j2
+#     dest: /etc/msmtprc
+#     owner: root
+#     group: root
+#     mode: '0644'
+
+
+# - name: Add mail aliases
+#   lineinfile:
+#     path: /etc/aliases
+#     regexp: '^{{ item.user }}:'
+#     line: '{{ item.user }}: {{ item.email }}'
+#     create: yes
+#   loop:
+#     - { user: '{{ username }}', email: '{{ EMAIL }}' }
+#     - { user: 'root', email: '{{ EMAIL }}' }
+#   notify: rebuild aliases

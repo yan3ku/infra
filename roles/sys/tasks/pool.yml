@@ -1,9 +1,4 @@
 ---
-- name: Ensure mergerfs is installed
-  package:
-    name: mergerfs
-    state: present
-
 - name: Get TANK disk labels
   command: lsblk -o label
   register: lsblk_output
@@ -25,7 +20,7 @@
     path: "/mnt/tank{{ item }}"
     state: directory
     owner: "{{ username }}"
-    group: "{{ username }}"
+    group: "media"
     mode: '0755'
   loop: "{{ tank_numbers }}"
 
@@ -34,7 +29,7 @@
     path: "/mnt/pool"
     state: directory
     owner: "{{ username }}"
-    group: "{{ username }}"
+    group: "media"
     mode: '0755'
 
 - name: Mount each disk and add to fstab

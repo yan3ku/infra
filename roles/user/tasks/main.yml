@@ -1,0 +1,5 @@
+- include_tasks: create.yml
+- include_tasks: ssh.yml
+- include_tasks: gpg.yml
+- include_tasks: config.yml
+- include_tasks: mail.yml

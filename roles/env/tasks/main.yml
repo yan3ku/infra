@@ -1,12 +1,13 @@
-- name: Run gengroupvars.sh to get user UID map
-  command: ./sysusers.sh
+- name: Extract users from .env file
+  command: "{{ role_path }}/files/envusers"
   register: user_json
+  become: no
   changed_when: false
   delegate_to: localhost
 
-- name: Parse JSON into user_map
+- name: Parse JSON into users_map
   set_fact:
-    user_map: "{{ user_json.stdout | from_json }}"
+    users_map: "{{ user_json.stdout | from_json }}"
 
 - name: Create system users with matching UID and GID
   user:
@@ -15,7 +16,7 @@
     create_home: false
     system: true
     state: present
-  loop: "{{ user_map | dict2items }}"
+  loop: "{{ users_map | dict2items }}"
 
 - name: Ensure groups exists
   group:
@@ -23,4 +24,4 @@
     gid: "{{ item.value }}"
     system: true
     state: present
-  loop: "{{ user_map | dict2items }}"
+  loop: "{{ users_map | dict2items }}"

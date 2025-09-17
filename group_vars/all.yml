@@ -1,9 +1,11 @@
 dotenv: "{{ playbook_dir + '/docker-config/.env' }}"
 
-shell:    /bin/bash
-username: yaneko
-password: "{{ lookup('dotenv', 'PASSWORD', file=dotenv) }}"
-EMAIL:    "{{ lookup('dotenv', 'EMAIL',    file=dotenv) }}"
+shell:        /bin/bash
+username:     yaneko
+ssh_port:     1234
+password:     "{{ lookup('dotenv', 'PASSWORD', file=dotenv) }}"
+EMAIL:        "{{ lookup('dotenv', 'EMAIL',    file=dotenv) }}"
+GMAIL_PASSWD: "{{ lookup('dotenv', 'GMAIL_PASSWORD', file=dotenv) }}"
 
 HOMEDIR:  "{{ lookup('dotenv', 'HOMEDIR', file=dotenv) }}"
 CONFDIR:  "{{ lookup('dotenv', 'CONFDIR', file=dotenv) }}"
@@ -16,14 +18,17 @@ USERCONF: "{{ HOMEDIR }}/{{ USERGIT | regex_search('/(.*)\\.git$', '\\1') | firs
 packages:
   - git
   - git-secret
+  - rsync
   - stow
   - emacs
   - tmux
   - xfsprogs
   - mergerfs
   - htop
+  - dos2unix
+  - tcpdump
   - lm-sensors
   - fancontrol
-  - msmtp
-  - msmtp-mta
   - smartmontools
+  - postfix
+  - libsasl2-modules
