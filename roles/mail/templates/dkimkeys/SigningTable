@@ -1,0 +1,2 @@
+*@{{ DOMAIN }} default._domainkey.{{ DOMAIN }}
+*@*.{{ DOMAIN }} default._domainkey.{{ DOMAIN }}

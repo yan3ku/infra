@@ -1,5 +1,0 @@
-- include_tasks: packages.yml
-- include_tasks: pool.yml
-- include_tasks: cron.yml
-- include_tasks: backup.yml
-- include_tasks: mail.yml

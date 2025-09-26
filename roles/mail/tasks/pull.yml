@@ -1,0 +1,24 @@
+---
+- name: Install sync mail packages
+  ansible.builtin.package:
+    name:
+      - notmuch
+      - isync
+    state: present
+
+- name: Ensure cron service is up
+  ansible.builtin.service:
+    name: cron
+    state: started
+    enabled: true
+
+- name: Add pull mail job
+  ansible.builtin.cron:
+    user: "{{ username }}"
+    name: pull mail
+    minute: "*/60"
+    hour: "*"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: "(mbsync -a && notmuch new) >/dev/null"

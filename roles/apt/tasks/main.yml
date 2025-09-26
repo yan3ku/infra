@@ -1,0 +1,15 @@
+---
+- name: Install netselect-apt
+  ansible.builtin.package:
+    name: netselect-apt
+    state: present
+
+# - name: Select fastest mirrors
+#   ansible.builtin.command:
+#     cmd: netselect-apt -ns -c poland --outfile /etc/source.d/99-netselect.list
+#     creates: /etc/apt/sources.list.d/99-netselect.list
+
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ packages }}"
+    state: present

@@ -1,0 +1,5 @@
+---
+- name: Reload wireguard tunnel
+  ansible.builtin.service:
+    name: wg-quick@wg86
+    state: reloaded

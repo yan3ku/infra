@@ -4,9 +4,10 @@ shell:        /bin/bash
 username:     yaneko
 ssh_port:     1234
 password:     "{{ lookup('dotenv', 'PASSWORD', file=dotenv) }}"
-EMAIL:        "{{ lookup('dotenv', 'EMAIL',    file=dotenv) }}"
-GMAIL_PASSWD: "{{ lookup('dotenv', 'GMAIL_PASSWORD', file=dotenv) }}"
+GMAIL_PASSWD: "{{ lookup('dotenv', 'GMAIL_PASSWORD',   file=dotenv) }}"
 
+EMAIL:    "{{ lookup('dotenv', 'EMAIL',   file=dotenv) }}"
+DOMAIN:   "{{ lookup('dotenv', 'SLD',  file=dotenv) }}.{{ lookup('dotenv', 'TLD',  file=dotenv) }}"
 HOMEDIR:  "{{ lookup('dotenv', 'HOMEDIR', file=dotenv) }}"
 CONFDIR:  "{{ lookup('dotenv', 'CONFDIR', file=dotenv) }}"
 BACKDIR:  "{{ lookup('dotenv', 'BACKDIR', file=dotenv) }}"
@@ -16,19 +17,11 @@ USERGIT: git@github.com:yan3ku/config.git
 USERCONF: "{{ HOMEDIR }}/{{ USERGIT | regex_search('/(.*)\\.git$', '\\1') | first }}"
 
 packages:
-  - git
-  - git-secret
-  - rsync
-  - stow
   - emacs
   - tmux
   - xfsprogs
-  - mergerfs
   - htop
   - dos2unix
   - tcpdump
   - lm-sensors
   - fancontrol
-  - smartmontools
-  - postfix
-  - libsasl2-modules

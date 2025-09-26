@@ -1,7 +1,18 @@
 ---
 - name: Setup server
   hosts: all
-  become: yes
+  become: true
   roles:
-    - role: sys
+    - role: apt
+    - role: groups
+    - role: networkd
+    - role: pool
+    - role: smartd
     - role: user
+    - role: ssh
+    - role: config
+    - role: gpg
+    - role: mail
+    - role: samba
+    - role: wireguard
+    - role: backup

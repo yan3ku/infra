@@ -1,0 +1,64 @@
+# See /usr/share/postfix/main.cf.dist for a commented, more complete version
+compatibility_level = 3.9
+
+# DOMAIN
+myhostname = mail.{{ DOMAIN }}
+myorigin   = $mydomain
+
+smtpd_banner = $myhostname ESMTP $mail_name (Debian)
+
+inet_protocols = ipv4
+inet_interfaces = all
+
+mynetworks       = 192.168.0.0/16 172.16.0.0/12 10.0.0.0/8 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+mydestination    = $myhostname, localhost.$mydomain, $mydomain
+relayhost =
+
+delay_warning_time = 4h
+mailbox_size_limit = 0
+# slash is needed so its treated as maildir
+home_mailbox = mail/inbox/
+mailbox_command =
+recipient_delimiter = +
+biff = no
+
+alias_database     = hash:/etc/aliases
+alias_maps         = hash:/etc/aliases
+relay_domains      = gmail.com
+smtp_sender_dependent_authentication = yes
+sender_dependent_relayhost_maps = hash:/etc/postfix/sender_relay
+# transport_maps     = hash:/etc/postfix/transport
+# virtual_alias_maps = hash:/etc/postfix/virtual
+
+# OpenDKIM
+smtpd_milters = inet:127.0.0.1:8891
+non_smtpd_milters = $smtpd_milters
+milter_default_action = accept
+
+# SASL
+cyrus_sasl_config_path = /etc/postfix/sasl
+
+smtpd_sasl_local_domain = $myhostname
+broken_sasl_auth_clients = yes
+smtp_sasl_auth_enable = yes
+
+smtp_sasl_security_options = noanonymous
+smtp_sasl_password_maps = hash:/etc/postfix/sasl/passwd
+
+# TLS
+smtpd_tls_cert_file = /opt/docker/swag/etc/letsencrypt/live/{{ DOMAIN }}/fullchain.pem
+smtpd_tls_key_file  = /opt/docker/swag/etc/letsencrypt/live/{{ DOMAIN }}/privkey.pem
+
+smtp_tls_CAfile   = /etc/ssl/certs/ca-certificates.crt
+smtp_tls_loglevel = 1
+
+smtp_tls_security_level  = may
+smtpd_tls_security_level = may
+
+# helo, sender, relay and recipient restrictions
+smtpd_sender_login_maps = pcre:/etc/postfix/login_maps.pcre
+smtpd_sender_restrictions = reject_sender_login_mismatch, permit_sasl_authenticated, permit_mynetworks, reject_unknown_reverse_client_hostname, reject_unknown_sender_domain
+smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, reject_unauth_destination, reject_unknown_recipient_domain
+smtpd_relay_restrictions = permit_sasl_authenticated, reject_unauth_destination
+smtpd_helo_required = yes
+smtpd_helo_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_invalid_helo_hostname, reject_non_fqdn_helo_hostname, reject_unknown_helo_hostname

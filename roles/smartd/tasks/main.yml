@@ -1,0 +1,18 @@
+---
+- name: Install smartd
+  ansible.builtin.package:
+    name: smartmontools
+    state: present
+
+- name: Set options
+  ansible.builtin.lineinfile:
+    path: /etc/smartd.conf
+    regexp: "^DEVICESCAN"
+    line: "DEVICESCAN -d removable -n standby,15,q -m yan3ku@gmail.com -M exec /usr/share/smartmontools/smartd-runner -s S/../.././23"
+  notify: Restart smartd
+
+- name: Ensure smartd is up
+  ansible.builtin.service:
+    name: smartmontools
+    state: started
+    enabled: true

@@ -1,0 +1,62 @@
+---
+- name: Install opendkim
+  ansible.builtin.package:
+    name: opendkim
+    state: present
+
+- name: Template opendkim
+  ansible.builtin.template:
+    src: "templates/opendkim.conf"
+    dest: "/etc/opendkim.conf"
+    owner: opendkim
+    group: opendkim
+    mode: "0644"
+  with_items:
+    - KeyTable
+    - SigningTable
+    - TrustedHosts
+  notify: Restart opendkim
+
+- name: Template dkimkeys
+  ansible.builtin.template:
+    src: "templates/dkimkeys/{{ item }}"
+    dest: "/etc/dkimkeys/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  with_items:
+    - KeyTable
+    - SigningTable
+    - TrustedHosts
+  notify: Restart opendkim
+
+- name: Ensures /etc/dkimkeys/{{ DOMAIN }}
+  ansible.builtin.file:
+    path: /etc/dkimkeys/{{ DOMAIN }}
+    state: directory
+    owner: opendkim
+    group: opendkim
+    mode: "0770"
+  notify:
+    - Restart opendkim
+    - Verify email
+
+- name: Copy private keys
+  ansible.builtin.template:
+    src: "templates/dkimkeys/domain/{{ item }}"
+    dest: "/etc/dkimkeys/{{ DOMAIN }}/{{ item }}"
+    owner: opendkim
+    group: opendkim
+    mode: "0660"
+  with_items:
+    - default.private
+    - default.txt
+  notify:
+    - Restart opendkim
+    - Verify email
+
+- name: Ensure opendkim is up
+  ansible.builtin.service:
+    name: opendkim
+    state: started
+    enabled: true

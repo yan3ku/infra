@@ -1,0 +1,8 @@
+[Match]
+Name=eth86
+
+[Network]
+Address=192.168.1.86/24
+Gateway=192.168.1.1
+DNS=8.8.8.8
+DNS=8.8.4.4

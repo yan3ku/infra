@@ -1,0 +1,9 @@
+---
+- name: Setup opendkim
+  ansible.builtin.include_tasks: tasks/dkim.yml
+
+- name: Setup postfix
+  ansible.builtin.include_tasks: tasks/postfix.yml
+
+- name: Setup mail sync job
+  ansible.builtin.include_tasks: tasks/pull.yml
