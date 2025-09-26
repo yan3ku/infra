@@ -1,9 +1,39 @@
 ---
-- name: Setup opendkim
-  ansible.builtin.include_tasks: tasks/dkim.yml
+# This is just MTA for system delivery
+# don't be insane and run mail by yourself
+- name: Install postfix
+  ansible.builtin.package:
+    name: postfix
+    state: present
 
-- name: Setup postfix
-  ansible.builtin.include_tasks: tasks/postfix.yml
+- name: Configure Postfix
+  ansible.builtin.debconf:
+    name: postfix
+    question: "postfix/main_mailer_type"
+    vtype: "string"
+    value: "Internet Site"
+  notify: Reload postfix
 
-- name: Setup mail sync job
-  ansible.builtin.include_tasks: tasks/pull.yml
+- name: Set mydomain
+  ansible.builtin.lineinfile:
+    regexp: "^mydomain"
+    line: "mydomain = {{ DOMAIN }}"
+    path: /etc/postfix/main.cf
+  notify: Reload postfix
+
+- name: Check if aliases.db exists
+  ansible.builtin.stat:
+    path: /etc/aliases.db
+  register: aliases
+
+- name: Run newaliases
+  ansible.builtin.command: newaliases
+  when: not aliases.stat.exists
+  changed_when: not aliases.stat.exists
+  notify: Reload postfix
+
+- name: Run postfix
+  ansible.builtin.service:
+    name: postfix
+    state: started
+    enabled: true

@@ -1,2 +1,0 @@
-default._domainkey	IN	TXT	( "v=DKIM1; h=sha256; k=rsa; "
-	  "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC4tXbASgFnRsFEfGJY7lF0WKqcFqYcCxDkCOxdvmtG3cssRdwHTSBGqpw2HlKWGYmNss1Mmi68w049vItJDqq/fKGjNPIQB/AikU+DpBkJfjsFUBMItD3nFVWolT+M76+uklCMtRaAv9h3IDtsYIQCItWnKTco9bndq00QpZNmQQIDAQAB" )  ; ----- DKIM key default for {{ DOMAIN }}

@@ -12,7 +12,7 @@
     - role: ssh
     - role: config
     - role: gpg
-    - role: mail
     - role: samba
+    - role: mail
     - role: wireguard
     - role: backup

@@ -1,5 +1,5 @@
 ---
-- name: Reload samba
+- name: Reload smbd
   ansible.builtin.service:
-    name: samba
+    name: smbd
     state: reloaded
