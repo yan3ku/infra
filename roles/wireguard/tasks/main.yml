@@ -1,0 +1,20 @@
+---
+- name: Install wireguard
+  ansible.builtin.package:
+    name: wireguard
+    state: present
+
+- name: Template wireguard tunnel
+  ansible.builtin.template:
+    src: templates/wg86.conf
+    dest: /etc/wireguard/wg86.conf
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Reload wireguard tunnel
+
+- name: Ensure wireguard tunnel is up
+  ansible.builtin.service:
+    name: wg-quick@wg86
+    state: started
+    enabled: true

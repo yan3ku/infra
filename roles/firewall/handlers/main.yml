@@ -1,0 +1,4 @@
+- name: Restore firewall
+  community.general.iptables_state:
+    state: restored
+    path: /etc/iptables/rules.v4

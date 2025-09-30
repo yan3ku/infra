@@ -1,0 +1,30 @@
+---
+- name: Install samba
+  ansible.builtin.package:
+    name: samba
+    state: present
+
+- name: Template smb
+  ansible.builtin.template:
+    src: templates/smb.conf
+    dest: /etc/samba/smb.conf
+    owner: root
+    group: root
+    mode: "0664"
+  notify: Reload smbd
+
+- name: Add user to samba shares
+  ansible.builtin.command:
+    cmd: "smbpasswd -a {{ username }}"
+  args:
+    stdin: |
+           {{ password }}
+           {{ password }}
+  register: smbpasswd
+  changed_when: "'Added user' in smbpasswd.stdout"
+
+- name: Ensure smbd is up
+  ansible.builtin.service:
+    name: smbd
+    state: started
+    enabled: true

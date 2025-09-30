@@ -1,0 +1,28 @@
+---
+- name: Extract users from .env file
+  ansible.builtin.command: "{{ role_path }}/files/envusers"
+  register: user_json
+  become: false
+  changed_when: false
+  delegate_to: localhost
+
+- name: Parse JSON into users_map
+  ansible.builtin.set_fact:
+    users_map: "{{ user_json.stdout | from_json }}"
+
+- name: Create system users with matching UID and GID
+  ansible.builtin.user:
+    name: "{{ item.key }}"
+    uid: "{{ item.value }}"
+    create_home: false
+    system: true
+    state: present
+  loop: "{{ users_map | dict2items }}"
+
+- name: Ensure groups exists
+  ansible.builtin.group:
+    name: "{{ item.key }}"
+    gid: "{{ item.value }}"
+    system: true
+    state: present
+  loop: "{{ users_map | dict2items }}"

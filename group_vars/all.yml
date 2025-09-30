@@ -1,0 +1,8 @@
+dotenv: "{{ playbook_dir + '/docker-config/.env' }}"
+
+DOMAIN:   "{{ lookup('dotenv', 'SLD',  file=dotenv) }}.{{ lookup('dotenv', 'TLD',  file=dotenv) }}"
+HOMEDIR:  "{{ lookup('dotenv', 'HOMEDIR', file=dotenv) }}"
+CONFDIR:  "{{ lookup('dotenv', 'CONFDIR', file=dotenv) }}"
+BACKDIR:  "{{ lookup('dotenv', 'BACKDIR', file=dotenv) }}"
+DATADIR:  "{{ lookup('dotenv', 'DATADIR', file=dotenv) }}"
+USERCONF: "{{ HOMEDIR }}/{{ user_git | regex_search('/(.*)\\.git$', '\\1') | first }}"

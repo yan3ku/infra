@@ -1,0 +1,4 @@
+#!/usr/bin/perl
+# usage: authget <MACHINE> <LOGIN>
+my $gpg = `gpg -q --for-your-eyes-only --no-tty -d {{ HOMEDIR }}/.authinfo.gpg`;
+print $1 if ($gpg =~ /^machine\s+\Q$ARGV[0]\E\s.*?login\s+\Q$ARGV[1]\E\s.*?password\s+"?([^"\n]+)"?/gm)

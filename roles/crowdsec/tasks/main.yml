@@ -1,0 +1,10 @@
+- name: Install crowdsec repo
+  ansible.builtin.package:
+    name: crowdsec-firewall-bouncer-iptables
+    state: present
+
+- name: Restart crowdsec-firewall-bouncer
+  ansible.builtin.service:
+    name: crowdsec-firewall-bouncer
+    state: started
+    enabled: true

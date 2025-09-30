@@ -1,0 +1,13 @@
+- name: Install iptables persistent
+  ansible.builtin.package:
+    name: iptables-persistent
+    state: present
+
+- name: Template firewall
+  ansible.builtin.template:
+    src: templates/rules.v4
+    dest: /etc/iptables/rules.v4
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restore firewall

@@ -1,0 +1,26 @@
+---
+- name: Install smartd
+  ansible.builtin.package:
+    name: smartmontools
+    state: present
+
+- name: Template notification
+  ansible.builtin.template:
+    src: templates/smartd-ntfy
+    dest: /usr/local/sbin/smartd-ntfy
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Set options
+  ansible.builtin.lineinfile:
+    path: /etc/smartd.conf
+    regexp: "^DEVICESCAN"
+    line: "DEVICESCAN -d removable -n standby,15,q -s S/../.././23 -m <nomailer> -M exec /usr/local/sbin/smartd-ntfy -M test"
+  notify: Restart smartd
+
+- name: Ensure smartd is up
+  ansible.builtin.service:
+    name: smartmontools
+    state: started
+    enabled: true

@@ -1,0 +1,71 @@
+---
+- name: Install rsync
+  ansible.builtin.package:
+    name: rsync
+    state: present
+
+- name: Ensure CONFDIR already synced
+  ansible.builtin.stat:
+    path: "{{ CONFDIR }}/.synced"
+  register: was_synced
+
+- name: Restore backup
+  when: not was_synced.stat.exists
+  block:
+    - name: Ensure the CONFDIR exists
+      ansible.builtin.file:
+        path: "{{ CONFDIR }}"
+        owner: "{{ username }}"
+        group: "media"
+        state: directory
+        mode: '0755'
+
+    - name: Ensure source backup exists
+      ansible.builtin.stat:
+        path: "{{ BACKDIR }}/latest"
+      register: backup_stat
+
+    - name: Fail if source backup doesn't exist
+      ansible.builtin.fail:
+        msg: "The backup source directory does not exist: {{ BACKDIR }}/latest"
+      when: not backup_stat.stat.exists
+
+    - name: Sync the latest backup to CONFDIR
+      ansible.posix.synchronize:
+        src: "{{ BACKDIR }}/latest/" # this slash is really important to "unpack" the directory
+        dest: "{{ CONFDIR }}"
+        archive: true
+        recursive: true
+      delegate_to: "{{ inventory_hostname }}"
+
+    - name: Create synced lock
+      ansible.builtin.file:
+        path: "{{ CONFDIR }}/.synced"
+        state: touch
+        mode: '0622'
+        owner: root
+        group: root
+
+- name: Ensure cron service is up
+  ansible.builtin.service:
+    name: cron
+    state: started
+    enabled: true
+
+- name: Add backup job
+  ansible.builtin.cron:
+    name: weekly backups
+    minute: "0"
+    hour: "0"
+    day: "*"
+    month: "*"
+    weekday: "1"
+    job: >
+      /opt/docker/docker-backup weekly &&
+      curl -fsS -m 10 --retry 5 -o /dev/null https://healthchecks.yaneko.net/ping/a745bb9c-d71d-49b1-a21d-a916e0bb5dd3
+
+- name: Pull docker images
+  community.docker.docker_compose_v2:
+    project_src: "{{ CONFDIR }}"
+    pull: missing
+    state: absent

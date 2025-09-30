@@ -1,0 +1,28 @@
+---
+- name: Install packages
+  ansible.builtin.package:
+    name:
+      - stow
+      - git
+      - git-secret
+      - git-secrets
+    state: present
+
+- name: Ensure github.com is in known_hosts
+  ansible.builtin.known_hosts:
+    name: github.com
+    key: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}"
+    path: "{{ HOMEDIR }}/.ssh/known_hosts"
+    state: present
+  become: false
+
+- name: Clone config repo
+  ansible.builtin.git:
+    repo: '{{ user_git }}'
+    dest: "{{ USERCONF }}"
+    version: master
+    update: false
+  become: false
+  notify:
+    - Stow config
+    - Reset files adopted by stow

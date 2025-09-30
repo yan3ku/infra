@@ -1,0 +1,71 @@
+---
+- name: Ensure rsync
+  ansible.builtin.package:
+    name: rsync
+    state: present
+
+- name: Passwd entry for {{ username }}
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ username }}"
+
+- name: Getent user home
+  ansible.builtin.set_fact:
+    user_home: "{{ getent_passwd[username][4] }}"
+
+- name: Move user home directory
+  when: user_home != HOMEDIR
+  block:
+    - name: Create user home directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ HOMEDIR }}"
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        mode: "0755"
+
+    - name: Sync old home to new home
+      ansible.posix.synchronize:
+        src: "/home/{{ username }}/"
+        dest: "{{ HOMEDIR }}/"
+        archive: true
+      delegate_to: "{{ inventory_hostname }}"
+
+    - name: Replace home path in /etc/passwd
+      ansible.builtin.replace:
+        path: /etc/passwd
+        regexp: '/home/{{ username }}'
+        replace: '{{ HOMEDIR }}'
+
+    - name: Remove old home directory
+      ansible.builtin.file:
+        path: "/home/{{ username }}"
+        state: absent
+
+    # changing home directory like this breaks gpg agent
+    # reseting connection nor restarting gpg agent fixes this
+    # only solution for now that worked is rebooting...
+    - name: Reboot the server
+      ansible.builtin.reboot:
+        msg: "Reboot initiated by Ansible"
+        reboot_timeout: 300
+
+- name: Add user to groups
+  ansible.builtin.user:
+    name: "{{ username }}"
+    password: "{{ password | password_hash('sha512') }}"
+    home: "{{ HOMEDIR }}"
+    groups: >
+      {{ users_map.keys() | list | union(['users', 'sudo']) }}
+    append: true
+    shell: "{{ shell }}"
+    update_password: on_create
+
+- name: Allow passwordless sudo
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ username }}"
+    content: "{{ username }} ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: root
+    mode: '0440'
+  become: true

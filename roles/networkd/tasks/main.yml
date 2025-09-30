@@ -1,0 +1,24 @@
+---
+- name: Start networkd
+  ansible.builtin.service:
+    name: systemd-networkd
+    enabled: true
+    state: started
+
+- name: Rename interface
+  ansible.builtin.template:
+    src: templates/eth86.link
+    dest: /etc/systemd/network/86-eth86.link
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart networkd
+
+- name: Give interface static IP
+  ansible.builtin.template:
+    src: templates/eth86.network
+    dest: /etc/systemd/network/86-eth86.network
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart networkd

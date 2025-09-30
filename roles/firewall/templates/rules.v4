@@ -1,0 +1,36 @@
+*filter
+:DOCKER-USER -
+:FIREWALL -
+#############################################
+-I FIREWALL -i lo                                      -j RETURN
+-I FIREWALL -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
+-I FIREWALL -p icmp                                    -j RETURN
+-A FIREWALL -s 172.16.0.0/12                           -j RETURN
+#############################################
+-A FIREWALL -p tcp --dport 22    -j RETURN -m comment --comment "ssh (installation)"
+
+-A FIREWALL -p udp --dport 53    -j RETURN -m comment --comment "adguard"
+-A FIREWALL -p tcp --dport 53    -j RETURN -m comment --comment "adguard"
+
+-A FIREWALL -p tcp --dport http  -j RETURN -m comment --comment "swag"
+-A FIREWALL -p tcp --dport https -j RETURN -m comment --comment "swag"
+-A FIREWALL -p tcp --dport 1234  -j RETURN -m comment --comment "ssh"
+-A FIREWALL -p tcp --dport 2137  -j RETURN -m comment --comment "slskd"
+
+# samba
+-A FIREWALL -p tcp -s 192.168.1.0/24,10.0.0.0/24 --dport 445 -j RETURN -m comment --comment "samba"
+
+# torrent
+-A FIREWALL -p tcp --dport 6969 -j RETURN -m comment --comment "qbit"
+-A FIREWALL -p udp --dport 6969 -j RETURN -m comment --comment "qbit"
+
+# wireguard
+-A FIREWALL -p tcp --dport 51820 -j RETURN -m comment --comment "wireguard"
+-A FIREWALL -p udp --dport 51820 -j RETURN -m comment --comment "wireguard"
+
+############################################
+-A FIREWALL -j DROP
+############################################
+-A DOCKER-USER -j FIREWALL
+-A INPUT -j FIREWALL
+COMMIT

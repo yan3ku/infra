@@ -1,0 +1,46 @@
+---
+- name: Setup server
+  hosts: all
+  become: true
+  vars:
+    shell: /bin/bash
+    username: yaneko
+    user_git: git@github.com:yan3ku/config.git
+    ssh_port: 1234
+    ip_addr: 192.168.1.86/24
+    dns1: 8.8.8.8
+    dns2: 8.8.4.4
+    smb_allow_hosts: 192.168.1.0/24 10.0.0.0/24
+    packages:
+      - emacs
+      - tmux
+      - xfsprogs
+      - htop
+      - dos2unix
+      - tcpdump
+      - lm-sensors
+      - fancontrol
+  pre_tasks:
+    - name: Shutup ansible
+      ansible.builtin.file:
+        path: /root/.ansible/tmp/
+        owner: root
+        group: root
+        mode: "0755"
+        state: directory
+  roles:
+    - role: apt
+    - role: groups
+    # - role: networkd
+    - role: pool
+    - role: smartd
+    - role: user
+    - role: ssh
+    - role: config
+    - role: gpg
+    - role: samba
+    - role: mail
+    - role: wireguard
+    - role: firewall
+    - role: geerlingguy.docker
+    - role: backup

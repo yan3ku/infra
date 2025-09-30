@@ -1,0 +1,65 @@
+---
+- name: Instal mergerfs
+  ansible.builtin.package:
+    name: mergerfs
+    state: present
+
+- name: Get TANK disk labels
+  ansible.builtin.command: lsblk -o label
+  register: lsblk_output
+  changed_when: false
+
+- name: Extract tank numbers
+  ansible.builtin.set_fact:
+    tank_numbers: "{{ lsblk_output.stdout_lines
+    | select('match', '^TANK[0-9]+$')
+    | map('regex_replace', '^TANK', '')
+    | list }}"
+
+- name: Extracted tank numbers
+  ansible.builtin.debug:
+    var: tank_numbers
+
+- name: Create mount points for external storage
+  ansible.builtin.file:
+    path: "/mnt/tank{{ item }}"
+    state: directory
+    owner: "{{ username }}"
+    group: "media"
+    mode: '0755'
+  loop: "{{ tank_numbers }}"
+
+- name: Ensure mergerfs mount point exists
+  ansible.builtin.file:
+    path: "/mnt/pool"
+    state: directory
+    owner: "{{ username }}"
+    group: "media"
+    mode: '0755'
+
+- name: Mount each disk and add to fstab
+  ansible.posix.mount:
+    path: "/mnt/tank{{ item }}"
+    src: "LABEL=TANK{{ item }}"
+    fstype: xfs
+    opts: defaults,noatime,nofail
+    state: mounted
+  loop: "{{ tank_numbers }}"
+
+- name: Mount mergerfs pool
+  ansible.posix.mount:
+    path: "/mnt/pool"
+    src: "/mnt/tank*"
+    fstype: mergerfs
+    opts: allow_other,use_ino,cache.files=partial,dropcacheonclose=true,category.create=mfs
+    state: mounted
+
+# unable to boot up if set permission on tank drives
+# but only changing it on /mnt/pool bypasses this???
+- name: Ensure pool permission
+  ansible.builtin.file:
+    path: "/mnt/pool"
+    state: directory
+    owner: "{{ username }}"
+    group: "media"
+    mode: '0755'

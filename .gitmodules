@@ -1,0 +1,3 @@
+[submodule "docker-config"]
+	path = docker-config
+	url = git@github.com:yan3ku/docker-config.git

@@ -1,0 +1,8 @@
+*/__pycache__/
+.gitsecret/keys/random_seed
+!*.secret
+roles/mail/templates/dkimkeys/domain/default.private
+roles/wireguard/templates/id86/id_*
+!roles/wireguard/templates/id86/id_*.pub
+!roles/wireguard/templates/id86/id_*.secret
+roles/wireguard/templates/wg86.conf
