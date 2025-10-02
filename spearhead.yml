@@ -1,16 +1,20 @@
 ---
-- name: Setup server
-  hosts: all
+- name: Deploy NAS
+  hosts: spearhead
   become: true
   vars:
     shell: /bin/bash
     username: yaneko
     user_git: git@github.com:yan3ku/config.git
+    user_groups: ['users', 'sudo', 'docker']
     ssh_port: 1234
     ip_addr: 192.168.1.86/24
+    wg_subnet: 10.0.0.0/24
+    lan_nets:
+      - 192.168.1.0/24
+      - 10.0.0.0/24
     dns1: 8.8.8.8
     dns2: 8.8.4.4
-    smb_allow_hosts: 192.168.1.0/24 10.0.0.0/24
     packages:
       - emacs
       - tmux
@@ -20,27 +24,20 @@
       - tcpdump
       - lm-sensors
       - fancontrol
-  pre_tasks:
-    - name: Shutup ansible
-      ansible.builtin.file:
-        path: /root/.ansible/tmp/
-        owner: root
-        group: root
-        mode: "0755"
-        state: directory
   roles:
+    - role: ansible
     - role: apt
     - role: groups
     # - role: networkd
     - role: pool
     - role: smartd
     - role: user
+    - role: firewall
     - role: ssh
     - role: config
     - role: gpg
     - role: samba
     - role: mail
     - role: wireguard
-    - role: firewall
     - role: geerlingguy.docker
     - role: backup

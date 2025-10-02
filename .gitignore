@@ -1,8 +1,9 @@
 */__pycache__/
 .gitsecret/keys/random_seed
+vault.yml
+.vault-pass.gpg
 !*.secret
 roles/mail/templates/dkimkeys/domain/default.private
-roles/wireguard/templates/id86/id_*
-!roles/wireguard/templates/id86/id_*.pub
-!roles/wireguard/templates/id86/id_*.secret
 roles/wireguard/templates/wg86.conf
+roles/wireguard/templates/pararaid.conf
+roles/wireguard/templates/spearhead.conf

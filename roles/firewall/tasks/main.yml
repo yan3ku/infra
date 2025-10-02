@@ -1,13 +1,19 @@
-- name: Install iptables persistent
+---
+- name: Install iptables
   ansible.builtin.package:
-    name: iptables-persistent
+    name:
+      - iptables
+      - iptables-persistent
     state: present
 
 - name: Template firewall
   ansible.builtin.template:
-    src: templates/rules.v4
+    src: "templates/{{ group_names[0] }}.rules.v4"
     dest: /etc/iptables/rules.v4
     owner: root
     group: root
     mode: "0600"
   notify: Restore firewall
+
+- name: Flush handlers (this fails if running after ssh role)
+  ansible.builtin.meta: flush_handlers

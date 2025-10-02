@@ -1,9 +1,4 @@
 ---
-- name: Ensure rsync
-  ansible.builtin.package:
-    name: rsync
-    state: present
-
 - name: Passwd entry for {{ username }}
   ansible.builtin.getent:
     database: passwd
@@ -23,6 +18,11 @@
         owner: "{{ username }}"
         group: "{{ username }}"
         mode: "0755"
+
+    - name: Ensure rsync
+      ansible.builtin.package:
+        name: rsync
+        state: present
 
     - name: Sync old home to new home
       ansible.posix.synchronize:
@@ -50,16 +50,30 @@
         msg: "Reboot initiated by Ansible"
         reboot_timeout: 300
 
+- name: Ensure user groups exists
+  ansible.builtin.group:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ user_groups }}"
+
 - name: Add user to groups
   ansible.builtin.user:
     name: "{{ username }}"
     password: "{{ password | password_hash('sha512') }}"
     home: "{{ HOMEDIR }}"
-    groups: >
-      {{ users_map.keys() | list | union(['users', 'sudo']) }}
+    groups: "{{ user_groups }}"
+      # {{ users_map.keys() | list | union(user_groups) }}
     append: true
     shell: "{{ shell }}"
     update_password: on_create
+
+- name: Hush login
+  ansible.builtin.file:
+    path: "{{ HOMEDIR }}/.hushlogin"
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: "0644"
+    state: touch
 
 - name: Allow passwordless sudo
   ansible.builtin.copy:

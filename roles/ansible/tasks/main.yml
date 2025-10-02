@@ -1,0 +1,8 @@
+---
+- name: Shutup ansible
+  ansible.builtin.file:
+    path: /root/.ansible/tmp/
+    owner: root
+    group: root
+    mode: "0755"
+    state: directory
