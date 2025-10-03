@@ -7,7 +7,6 @@
 #############################################
 -A FIREWALL -p tcp -s {{ lan_nets | join(',') }} --dport 5201 -j RETURN -m comment --comment "iperf3"
 -A FIREWALL -p tcp --dport {{ ssh_port }} -j RETURN -m comment --comment "ssh"
--A FIREWALL -p tcp --dport 22             -j RETURN -m comment --comment "ssh"
 -A FIREWALL -p tcp --dport 51820          -j RETURN -m comment --comment "wireguard"
 -A FIREWALL -p udp --dport 51820          -j RETURN -m comment --comment "wireguard"
 ############################################

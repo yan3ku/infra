@@ -4,6 +4,14 @@
     name: ssh
     state: restarted
 
+- name: Set ansible_port
+  ansible.builtin.set_fact:
+    ansible_port: "{{ ssh_port }}"
+
+- name: Set ansible_user
+  ansible.builtin.set_fact:
+    ansible_user: "{{ username }}"
+
 - name: Reload systemd
   ansible.builtin.systemd_service:
     daemon_reload: true

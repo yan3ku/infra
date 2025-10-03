@@ -27,13 +27,13 @@
   roles:
     - role: ansible
     - role: apt
-    - role: groups
-    # - role: networkd
     - role: pool
-    - role: smartd
+    - role: groups
     - role: user
-    - role: firewall
     - role: ssh
+    # - role: networkd
+    - role: smartd
+    - role: firewall
     - role: config
     - role: gpg
     - role: samba

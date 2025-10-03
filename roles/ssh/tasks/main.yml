@@ -26,6 +26,8 @@
   notify:
     - Reload systemd
     - Restart ssh
+    - Set ansible_port
+    - Set ansible_user
 
 - name: Ensure .ssh directory exists
   ansible.builtin.file:

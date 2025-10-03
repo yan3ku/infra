@@ -14,6 +14,3 @@
     group: root
     mode: "0600"
   notify: Restore firewall
-
-- name: Flush handlers (this fails if running after ssh role)
-  ansible.builtin.meta: flush_handlers
