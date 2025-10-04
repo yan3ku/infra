@@ -7,11 +7,11 @@
       vars:
         user_name: yaneko
         user_nopasswd_sudo: true
-        user_shell: /bin/bash
         user_groups: ['users', 'sudo']
     - role: ssh
       vars:
         ssh_port: 1234
+        ssh_user: yaneko
     - role: firewall
       vars:
         lan_nets:
@@ -24,4 +24,3 @@
       vars:
         user_name: vault
         user_home: /var/vault
-        user_nopasswd_sudo: false

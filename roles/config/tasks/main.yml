@@ -7,6 +7,7 @@
       - git-secret
       - git-secrets
     state: present
+  become: true
 
 - name: Copy private SSH key
   ansible.builtin.copy:
@@ -22,7 +23,6 @@
     key: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}"
     path: "{{ user_home }}/.ssh/known_hosts"
     state: present
-  become: false
 
 - name: Clone config repo
   ansible.builtin.git:
@@ -30,7 +30,6 @@
     dest: "{{ user_conf }}"
     version: master
     update: false
-  become: false
   notify:
     - Stow config
     - Reset files adopted by stow

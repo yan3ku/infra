@@ -3,42 +3,49 @@
   hosts: spearhead
   become: true
   vars:
-    user_shell: /bin/bash
     user_name: yaneko
-    user_git: git@github.com:yan3ku/config.git
-    user_groups: ['users', 'sudo', 'docker']
-    user_nopasswd_sudo: true
-    ssh_port: 1234
-    ip_addr: 192.168.1.86/24
-    wg_subnet: 10.0.0.0/24
     lan_nets:
       - 192.168.1.0/24
       - 10.0.0.0/24
-    dns1: 8.8.8.8
-    dns2: 8.8.4.4
-    packages:
-      - emacs
-      - tmux
-      - xfsprogs
-      - htop
-      - dos2unix
-      - tcpdump
-      - lm-sensors
-      - fancontrol
   roles:
     - role: ansible
     - role: apt
-    - role: pool
+      vars:
+        packages:
+          - emacs
+          - tmux
+          - xfsprogs
+          - htop
+          - tcpdump
+          - lm-sensors
+          - fancontrol
     - role: groups
+    - role: pool
     - role: user
+      vars:
+        user_groups: ['users', 'sudo', 'docker']
+        user_nopasswd_sudo: true
+    # - role: gpg
+    - role: config
+      become: true
+      become_user: yaneko
+      vars:
+        user_git: git@github.com:yan3ku/config.git
     - role: ssh
+      vars:
+        ssh_port: 1234
+        ssh_user: yaneko
     # - role: networkd
+    #   vars:
+    #     ip_addr: 192.168.1.86/24
+    #     dns1: 8.8.8.8
+    #     dns2: 8.8.4.4
     - role: smartd
     - role: firewall
-    - role: config
-    - role: gpg
     - role: samba
     - role: mail
     - role: wireguard
+      vars:
+        wg_subnet: 10.0.0.0/24
     - role: geerlingguy.docker
     - role: backup

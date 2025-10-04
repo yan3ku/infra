@@ -24,7 +24,10 @@
     - regexp: "^X11Forwarding"
       line: "X11Forwarding no"
   notify:
-    - Reload systemd
-    - Restart ssh
     - Set ansible_port
     - Set ansible_user
+    - Reload systemd
+    - Restart ssh
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers

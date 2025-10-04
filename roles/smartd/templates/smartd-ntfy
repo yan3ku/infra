@@ -1,2 +1,2 @@
 #!/bin/bash
-curl -Ls -H "Title: $SMARTD_SUBJECT" -d "$SMARTD_FAILTYPE Device: $SMARTD_DEVICE Time: $SMARTD_TFIRST Message: $SMARTD_FULLMESSAGE" http://ntfy.{{ DOMAIN }}/smartd
+curl -Ls -H "Title: $SMARTD_SUBJECT" -d "$SMARTD_FAILTYPE Device: $SMARTD_DEVICE Time: $SMARTD_TFIRST Message: $SMARTD_FULLMESSAGE" http://ntfy.{{ domain }}/smartd

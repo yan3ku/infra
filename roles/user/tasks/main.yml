@@ -64,7 +64,8 @@
     name: "{{ user_name }}"
     password: "{{ user_passwd | password_hash('sha512') }}"
     home: "{{ user_home }}"
-    groups: "{{ users_map.keys() | list | union(user_groups) }}"
+    groups: "{{ user_groups }}"
+#    groups: "{{ users_map.keys() | list | union(user_groups) }}"
     append: true
     shell: "{{ user_shell }}"
     update_password: on_create
