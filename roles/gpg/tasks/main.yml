@@ -1,6 +1,6 @@
 ---
 - name: Export GPG key on control node
-  ansible.builtin.command: "gpg --batch --export-secret-key --armor {{ username }}"
+  ansible.builtin.command: "gpg --batch --export-secret-key --armor {{ user_name }}"
   register: gpg_key_export
   delegate_to: localhost
   changed_when: false
@@ -15,7 +15,7 @@
   changed_when: "'imported: 1' in gpg_out.stderr"
   become_user: "{{ item }}"
   with_items:
-    - "{{ username }}"
+    - "{{ user_name }}"
     - root
 
 - name: Deploy authget

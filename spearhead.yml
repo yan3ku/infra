@@ -3,10 +3,11 @@
   hosts: spearhead
   become: true
   vars:
-    shell: /bin/bash
-    username: yaneko
+    user_shell: /bin/bash
+    user_name: yaneko
     user_git: git@github.com:yan3ku/config.git
     user_groups: ['users', 'sudo', 'docker']
+    user_nopasswd_sudo: true
     ssh_port: 1234
     ip_addr: 192.168.1.86/24
     wg_subnet: 10.0.0.0/24

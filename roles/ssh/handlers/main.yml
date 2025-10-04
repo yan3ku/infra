@@ -10,7 +10,7 @@
 
 - name: Set ansible_user
   ansible.builtin.set_fact:
-    ansible_user: "{{ username }}"
+    ansible_user: "{{ user_name }}"
 
 - name: Reload systemd
   ansible.builtin.systemd_service:

@@ -24,7 +24,7 @@
   ansible.builtin.file:
     path: "/mnt/tank{{ item }}"
     state: directory
-    owner: "{{ username }}"
+    owner: "{{ user_name }}"
     group: "media"
     mode: '0755'
   loop: "{{ tank_numbers }}"
@@ -33,7 +33,7 @@
   ansible.builtin.file:
     path: "/mnt/pool"
     state: directory
-    owner: "{{ username }}"
+    owner: "{{ user_name }}"
     group: "media"
     mode: '0755'
 
@@ -60,6 +60,6 @@
   ansible.builtin.file:
     path: "/mnt/pool"
     state: directory
-    owner: "{{ username }}"
+    owner: "{{ user_name }}"
     group: "media"
     mode: '0755'

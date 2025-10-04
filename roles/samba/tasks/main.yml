@@ -15,11 +15,11 @@
 
 - name: Add user to samba shares
   ansible.builtin.command:
-    cmd: "smbpasswd -a {{ username }}"
+    cmd: "smbpasswd -a {{ user_name }}"
   args:
     stdin: |
-           {{ password }}
-           {{ password }}
+           {{ user_passwd }}
+           {{ user_passwd }}
   register: smbpasswd
   changed_when: "'Added user' in smbpasswd.stdout"
 

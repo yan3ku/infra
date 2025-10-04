@@ -7,3 +7,9 @@ Decisions:
 - I don't docker wireguard or DNS because It can mess routing (and is simpler)
 - I use iptables to manage my firewall, solutions like firewalld or ufw don't work with docker and writing rules myself makes them easy to manage.
   Here is my blog post explaining it: https://yaneko.net/posts/iptables101.html
+
+
+TODO:
+[ ] set dns and fix networkd
+[ ] setup crowdsec firewall bouncer itpables
+[ ] fix groups role with user interaction

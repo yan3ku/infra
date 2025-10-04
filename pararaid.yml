@@ -2,18 +2,26 @@
 - name: Deploy VPN
   hosts: pararaid
   become: true
-  vars:
-    username: yaneko
-    ssh_port: 1234
-    shell: /bin/bash
-    user_groups: ['users', 'sudo']
-    wg_subnet: 10.0.0.0/24
-    lan_nets:
-      - 192.168.1.0/24
-      - 10.0.0.0/24
   roles:
     - role: user
+      vars:
+        user_name: yaneko
+        user_nopasswd_sudo: true
+        user_shell: /bin/bash
+        user_groups: ['users', 'sudo']
     - role: ssh
+      vars:
+        ssh_port: 1234
     - role: firewall
+      vars:
+        lan_nets:
+          - 192.168.1.0/24
+          - 10.0.0.0/24
     - role: wireguard
-    - role: vault
+      vars:
+        wg_subnet: 10.0.0.0/24
+    - role: user
+      vars:
+        user_name: vault
+        user_home: /var/vault
+        user_nopasswd_sudo: false

@@ -6,41 +6,41 @@
 
 - name: Ensure CONFDIR already synced
   ansible.builtin.stat:
-    path: "{{ CONFDIR }}/.synced"
+    path: "{{ confdir }}/.synced"
   register: was_synced
 
 - name: Restore backup
   when: not was_synced.stat.exists
   block:
-    - name: Ensure the CONFDIR exists
+    - name: Ensure the user_conf exists
       ansible.builtin.file:
-        path: "{{ CONFDIR }}"
-        owner: "{{ username }}"
+        path: "{{ confdir }}"
+        owner: "{{ user_name }}"
         group: "media"
         state: directory
         mode: '0755'
 
     - name: Ensure source backup exists
       ansible.builtin.stat:
-        path: "{{ BACKDIR }}/latest"
+        path: "{{ backdir }}/latest"
       register: backup_stat
 
     - name: Fail if source backup doesn't exist
       ansible.builtin.fail:
-        msg: "The backup source directory does not exist: {{ BACKDIR }}/latest"
+        msg: "The backup source directory does not exist: {{ backdir }}/latest"
       when: not backup_stat.stat.exists
 
     - name: Sync the latest backup to CONFDIR
       ansible.posix.synchronize:
-        src: "{{ BACKDIR }}/latest/" # this slash is really important to "unpack" the directory
-        dest: "{{ CONFDIR }}"
+        src: "{{ backdir }}/latest/" # this slash is really important to "unpack" the directory
+        dest: "{{ confdir }}"
         archive: true
         recursive: true
       delegate_to: "{{ inventory_hostname }}"
 
     - name: Create synced lock
       ansible.builtin.file:
-        path: "{{ CONFDIR }}/.synced"
+        path: "{{ confdir }}/.synced"
         state: touch
         mode: '0622'
         owner: root
@@ -62,6 +62,6 @@
 
 - name: Pull docker images
   community.docker.docker_compose_v2:
-    project_src: "{{ CONFDIR }}"
+    project_src: "{{ confdir }}"
     pull: missing
     state: absent
