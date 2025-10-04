@@ -3,13 +3,16 @@
   ansible.builtin.getent:
     database: passwd
     key: "{{ username }}"
+  register: getent_passwd
+  failed_when: false
 
 - name: Getent user home
   ansible.builtin.set_fact:
     user_home: "{{ getent_passwd[username][4] }}"
+  when: getent_passwd.found is defined
 
 - name: Move user home directory
-  when: user_home != HOMEDIR
+  when: getent_passwd.found is defined and user_home != HOMEDIR
   block:
     - name: Create user home directory
       ansible.builtin.file:
@@ -72,6 +75,8 @@
     path: "{{ HOMEDIR }}/.hushlogin"
     owner: "{{ username }}"
     group: "{{ username }}"
+    access_time: preserve
+    modification_time: preserve
     mode: "0644"
     state: touch
 

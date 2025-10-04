@@ -16,3 +16,4 @@
     - role: ssh
     - role: firewall
     - role: wireguard
+    - role: vault

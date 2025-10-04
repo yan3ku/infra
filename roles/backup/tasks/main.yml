@@ -55,14 +55,10 @@
 - name: Add backup job
   ansible.builtin.cron:
     name: weekly backups
-    minute: "0"
-    hour: "0"
-    day: "*"
-    month: "*"
-    weekday: "1"
+    special_time: "weekly"
     job: >
       /opt/docker/docker-backup weekly &&
-      curl -fsS -m 10 --retry 5 -o /dev/null https://healthchecks.yaneko.net/ping/a745bb9c-d71d-49b1-a21d-a916e0bb5dd3
+      curl -fsS -m 10 --retry 5 -o /dev/null https://healthchecks.yaneko.net/ping/Ww46tNyjuhhr9MInNIxIPw/cron-docker-backup
 
 - name: Pull docker images
   community.docker.docker_compose_v2:
