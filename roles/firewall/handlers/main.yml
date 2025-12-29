@@ -4,3 +4,4 @@
     path: /etc/iptables/rules.v4
   async: "{{ ansible_timeout }}"
   poll: 0
+  when: not ansible_check_mode

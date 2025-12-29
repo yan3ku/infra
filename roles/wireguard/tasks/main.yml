@@ -13,6 +13,7 @@
     owner: root
     group: root
     mode: "0600"
+    backup: true
   notify: Reload wireguard tunnel
 
 - name: Ensure wireguard tunnel is up

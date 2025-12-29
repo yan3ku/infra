@@ -1,10 +1,11 @@
 ---
 - name: Extract users from .env file
-  ansible.builtin.command: "{{ role_path }}/files/envusers"
+  ansible.builtin.command: "{{ role_path }}/files/users.py"
   register: user_json
   become: false
   changed_when: false
   delegate_to: localhost
+  check_mode: false
 
 - name: Parse JSON into users_map
   ansible.builtin.set_fact:

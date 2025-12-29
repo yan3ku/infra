@@ -1,0 +1,46 @@
+- name: Update SSH configuration to be more secure.
+  ansible.builtin.lineinfile:
+    dest: "/etc/ssh/sshd_config"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    validate: 'sshd -T -f %s'
+    mode: "0644"
+  with_items:
+    - regexp: "^PasswordAuthentication"
+      line: "PasswordAuthentication no"
+    - regexp: "^UseDNS"
+      line: "UseDNS no"
+    - regexp: "^PermitEmptyPasswords"
+      line: "PermitEmptyPasswords no"
+    - regexp: "^ChallengeResponseAuthentication"
+      line: "ChallengeResponseAuthentication no"
+    - regexp: "^GSSAPIAuthentication"
+      line: "GSSAPIAuthentication no"
+    - regexp: "^X11Forwarding"
+      line: "X11Forwarding no"
+    # - regexp:
+    #   line: "AuthorizedKeysFile .ssh/authorized_keys /etc/ssh/authorized_keys"
+  notify:
+    - Reload systemd
+    - Restart ssh
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Check whether ssh config template
+  ansible.builtin.stat:
+    path: "{{ role_path }}/templates/{{ group_names[0] }}.config"
+  delegate_to: localhost
+  run_once: true
+  register: ssh_config_stat
+
+- name: Template ssh config
+  when: ssh_config_stat.stat.exists
+  ansible.builtin.template:
+    src: "templates/{{ group_names[0] }}.config"
+    dest: "/etc/ssh/ssh_config.d/10-known-hosts.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+    backup: true

@@ -8,14 +8,7 @@
       - git-secrets
     state: present
   become: true
-
-- name: Copy private SSH key
-  ansible.builtin.copy:
-    src: "~/.ssh/id_ed25519"
-    dest: "{{ user_home }}/.ssh/id_ed25519"
-    owner: "{{ user_name }}"
-    group: "{{ user_name }}"
-    mode: '0600'
+  become_user: root
 
 - name: Ensure github.com is in known_hosts
   ansible.builtin.known_hosts:

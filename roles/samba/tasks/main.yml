@@ -11,6 +11,7 @@
     owner: root
     group: root
     mode: "0664"
+    backup: true
   notify: Reload smbd
 
 - name: Add user to samba shares

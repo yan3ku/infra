@@ -1,3 +1,4 @@
+---
 - name: Install crowdsec repo
   ansible.builtin.package:
     name: crowdsec-firewall-bouncer-iptables

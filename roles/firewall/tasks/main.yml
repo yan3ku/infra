@@ -13,4 +13,5 @@
     owner: root
     group: root
     mode: "0600"
+    backup: true
   notify: Restore firewall

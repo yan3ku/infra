@@ -1,25 +1,36 @@
 ---
-# This is just MTA for system delivery
-# don't be insane and run mail by yourself
-- name: Install postfix
+- name: Install Postfix and SASL modules
   ansible.builtin.package:
-    name: postfix
+    name:
+      - postfix
+      - libsasl2-modules
     state: present
 
-- name: Configure Postfix
-  ansible.builtin.debconf:
-    name: postfix
-    question: "postfix/main_mailer_type"
-    vtype: "string"
-    value: "Internet Site"
+- name: Template Postfix main.cf
+  ansible.builtin.template:
+    src: templates/main.cf
+    dest: /etc/postfix/main.cf
+    mode: '0644'
+    backup: true
   notify: Reload postfix
 
-- name: Set mydomain
-  ansible.builtin.lineinfile:
-    regexp: "^mydomain"
-    line: "mydomain = {{ domain }}"
-    path: /etc/postfix/main.cf
-  notify: Reload postfix
+- name: Template SASL password file
+  ansible.builtin.template:
+    src: templates/sasl_passwd
+    dest: /etc/postfix/sasl_passwd
+    owner: root
+    group: root
+    mode: '0600'
+  register: sasl_file
+  notify: Postmap sasl_passwd
+
+- name: Template sender canonical maps
+  ansible.builtin.template:
+    src: templates/sender_canonical
+    dest: /etc/postfix/sender_canonical
+    mode: '0644'
+  register: canonical_file
+  notify: Postmap sender_canonical
 
 - name: Check if aliases.db exists
   ansible.builtin.stat:
@@ -32,7 +43,7 @@
   changed_when: not aliases.stat.exists
   notify: Reload postfix
 
-- name: Run postfix
+- name: Ensure Postfix is running
   ansible.builtin.service:
     name: postfix
     state: started

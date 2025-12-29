@@ -1,0 +1,22 @@
+myhostname = {{ ansible_hostname }}
+mydomain = {{ domain }}
+myorigin = $mydomain
+
+# net access
+mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+inet_interfaces = loopback-only
+
+# slash / is for maildir format
+home_mailbox = mail/
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+
+# relay
+relayhost = [smtp.gmail.com]:587
+smtp_tls_security_level = may
+smtp_sasl_auth_enable = yes
+smtp_sasl_security_options = noanonymous
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+
+# rewrite addresses
+sender_canonical_maps = hash:/etc/postfix/sender_canonical

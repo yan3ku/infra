@@ -26,18 +26,18 @@
     state: directory
     owner: "{{ user_name }}"
     group: "media"
-    mode: '0755'
+    mode: '0775'
   loop: "{{ tank_numbers }}"
 
-- name: Ensure mergerfs mount point exists
+- name: Ensure mergerfs mount at /mnt/pool exist
   ansible.builtin.file:
     path: "/mnt/pool"
     state: directory
     owner: "{{ user_name }}"
     group: "media"
-    mode: '0755'
+    mode: '0775'
 
-- name: Mount each disk and add to fstab
+- name: Mount each disk at /mnt/tankXX and add to fstab
   ansible.posix.mount:
     path: "/mnt/tank{{ item }}"
     src: "LABEL=TANK{{ item }}"
@@ -53,13 +53,3 @@
     fstype: mergerfs
     opts: allow_other,use_ino,cache.files=partial,dropcacheonclose=true,category.create=mfs
     state: mounted
-
-# unable to boot up if set permission on tank drives
-# but only changing it on /mnt/pool bypasses this???
-- name: Ensure pool permission
-  ansible.builtin.file:
-    path: "/mnt/pool"
-    state: directory
-    owner: "{{ user_name }}"
-    group: "media"
-    mode: '0755'

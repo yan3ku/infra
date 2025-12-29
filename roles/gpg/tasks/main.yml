@@ -1,16 +1,13 @@
 ---
-- name: Export GPG key on control node
-  ansible.builtin.command: "gpg --batch --export-secret-key --armor {{ user_name }}"
-  register: gpg_key_export
-  delegate_to: localhost
-  changed_when: false
-  become: false
+- name: Install gpg
+  ansible.builtin.package:
+    name: gpg
+    state: present
 
 - name: Import private GPG key
   ansible.builtin.command:
     cmd: "gpg --batch --import"
-  args:
-    stdin: "{{ gpg_key_export.stdout }}"
+    stdin: "{{ gpg_secret_key }}"
   register: gpg_out
   changed_when: "'imported: 1' in gpg_out.stderr"
   become_user: "{{ item }}"

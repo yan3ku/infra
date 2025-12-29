@@ -13,7 +13,6 @@
       vars:
         packages:
           - emacs
-          - tmux
           - xfsprogs
           - htop
           - tcpdump
@@ -25,16 +24,22 @@
       vars:
         user_groups: ['users', 'sudo', 'docker']
         user_nopasswd_sudo: true
-    # - role: gpg
+    - role: ssh
+      vars:
+        user_name: yaneko
+        ssh_copy_private_key: true
+    - role: ssh
+      vars:
+        user_name: root
+        user_home: /root/
+        ssh_copy_private_key: true
+    - role: sshd
+    - role: gpg
     - role: config
       become: true
       become_user: yaneko
       vars:
         user_git: git@github.com:yan3ku/config.git
-    - role: ssh
-      vars:
-        ssh_port: 1234
-        ssh_user: yaneko
     # - role: networkd
     #   vars:
     #     ip_addr: 192.168.1.86/24

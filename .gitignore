@@ -7,3 +7,5 @@ roles/mail/templates/dkimkeys/domain/default.private
 roles/wireguard/templates/wg86.conf
 roles/wireguard/templates/pararaid.conf
 roles/wireguard/templates/spearhead.conf
+roles/ssh/templates/spearhead.config
+roles/sshd/templates/spearhead.config

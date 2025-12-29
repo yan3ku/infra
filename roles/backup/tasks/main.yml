@@ -1,50 +1,29 @@
 ---
-- name: Install rsync
+- name: Install restic
   ansible.builtin.package:
-    name: rsync
+    name: restic
     state: present
 
-- name: Ensure CONFDIR already synced
-  ansible.builtin.stat:
-    path: "{{ confdir }}/.synced"
-  register: was_synced
+- name: Ensure known_hosts
+  ansible.builtin.known_hosts:
+    name: "{{ backup_host }}"
+    key: "{{ backup_host }} {{ backup_host_key }}"
+    path: "{{ ansible_env.HOME }}/.ssh/known_hosts"
+    state: present
 
-- name: Restore backup
-  when: not was_synced.stat.exists
-  block:
-    - name: Ensure the user_conf exists
-      ansible.builtin.file:
-        path: "{{ confdir }}"
-        owner: "{{ user_name }}"
-        group: "media"
-        state: directory
-        mode: '0755'
+- name: Ensure {{ confdir }}
+  ansible.builtin.file:
+    path: "{{ confdir }}"
+    owner: "{{ user_name }}"
+    group: media
+    mode: "0750"
+    state: directory
 
-    - name: Ensure source backup exists
-      ansible.builtin.stat:
-        path: "{{ backdir }}/latest"
-      register: backup_stat
-
-    - name: Fail if source backup doesn't exist
-      ansible.builtin.fail:
-        msg: "The backup source directory does not exist: {{ backdir }}/latest"
-      when: not backup_stat.stat.exists
-
-    - name: Sync the latest backup to CONFDIR
-      ansible.posix.synchronize:
-        src: "{{ backdir }}/latest/" # this slash is really important to "unpack" the directory
-        dest: "{{ confdir }}"
-        archive: true
-        recursive: true
-      delegate_to: "{{ inventory_hostname }}"
-
-    - name: Create synced lock
-      ansible.builtin.file:
-        path: "{{ confdir }}/.synced"
-        state: touch
-        mode: '0622'
-        owner: root
-        group: root
+- name: Restore from cloud
+  ansible.builtin.command:
+    cmd: "restic -r {{ backup_repo }} restore latest:{{ confdir }} --target {{ confdir }}"
+    creates: "{{ confdir }}/docker-compose.yaml"
+    stdin: "{{ backup_passwd }}"
 
 - name: Ensure cron service is up
   ansible.builtin.service:
@@ -55,13 +34,17 @@
 - name: Add backup job
   ansible.builtin.cron:
     name: weekly backups
-    special_time: "weekly"
+    minute: "0"
+    hour: "0"
+    day: "*"
+    month: "*"
+    weekday: "1"
     job: >
-      /opt/docker/docker-backup weekly &&
+      {{ confdir }}/docker-backup &&
       curl -fsS -m 10 --retry 5 -o /dev/null https://healthchecks.yaneko.net/ping/Ww46tNyjuhhr9MInNIxIPw/cron-docker-backup
 
-- name: Pull docker images
-  community.docker.docker_compose_v2:
-    project_src: "{{ confdir }}"
-    pull: missing
-    state: absent
+# - name: Pull docker images
+#   community.docker.docker_compose_v2:
+#     project_src: "{{ confdir }}"
+#     pull: missing
+#     state: absent

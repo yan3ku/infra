@@ -11,6 +11,7 @@
     owner: root
     group: root
     mode: "0755"
+    backup: true
 
 - name: Set options
   ansible.builtin.lineinfile:

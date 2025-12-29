@@ -8,10 +8,10 @@
         user_name: yaneko
         user_nopasswd_sudo: true
         user_groups: ['users', 'sudo']
+    - role: sshd
     - role: ssh
       vars:
-        ssh_port: 1234
-        ssh_user: yaneko
+        user_name: yaneko
     - role: firewall
       vars:
         lan_nets:
@@ -24,3 +24,6 @@
       vars:
         user_name: vault
         user_home: /var/vault
+    - role: ssh
+      vars:
+        user_name: vault

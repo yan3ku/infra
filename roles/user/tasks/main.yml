@@ -3,16 +3,13 @@
   ansible.builtin.getent:
     database: passwd
     key: "{{ user_name }}"
-  register: getent_passwd
-  failed_when: false
 
 - name: Getent user home
   ansible.builtin.set_fact:
-    user_home: "{{ getent_passwd[user_name][4] }}"
-  when: getent_passwd.found is defined
+    current_home: "{{ getent_passwd[user_name][4] }}"
 
 - name: Move user home directory
-  when: getent_passwd.found is defined and user_home != user_home
+  when: current_home != user_home
   block:
     - name: Create user home directory
       ansible.builtin.file:
@@ -59,16 +56,18 @@
     state: present
   loop: "{{ user_groups }}"
 
-- name: Add user to groups
-  ansible.builtin.user:
-    name: "{{ user_name }}"
-    password: "{{ user_passwd | password_hash('sha512') }}"
-    home: "{{ user_home }}"
-    groups: "{{ user_groups }}"
-#    groups: "{{ users_map.keys() | list | union(user_groups) }}"
-    append: true
-    shell: "{{ user_shell }}"
-    update_password: on_create
+# - name: Add user to groups
+#   ansible.builtin.user:
+#     name: "{{ user_name }}"
+#     password: "{{ user_passwd | password_hash('sha512') }}"
+#     home: "{{ user_home }}"
+#     # groups: "{{ user_groups }}"
+# #    groups: "{{ users_map.keys() | list | union(user_groups) }}"
+#     # append: true
+#     shell: "{{ user_shell }}"
+#     update_password: on_create
+#   become: true
+#   become_user: root
 
 - name: Hush login
   ansible.builtin.file:
@@ -89,17 +88,3 @@
     mode: '0440'
   when: user_nopasswd_sudo
   become: true
-
-- name: Ensure .ssh directory exists
-  ansible.builtin.file:
-    path: "{{ user_home }}/.ssh"
-    state: directory
-    owner: "{{ user_name }}"
-    group: "{{ user_name }}"
-    mode: '0700'
-
-- name: Add SSH public key to authorized_keys
-  ansible.posix.authorized_key:
-    user: "{{ user_name }}"
-    key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
-    state: present
