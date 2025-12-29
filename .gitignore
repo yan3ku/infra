@@ -1,6 +1,5 @@
 */__pycache__/
 .gitsecret/keys/random_seed
-.vault-pass.gpg
 !*.secret
 roles/mail/templates/dkimkeys/domain/default.private
 roles/wireguard/templates/wg86.conf
