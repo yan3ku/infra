@@ -1,3 +1,4 @@
+---
 - name: Update SSH configuration to be more secure.
   ansible.builtin.lineinfile:
     dest: "/etc/ssh/sshd_config"
@@ -15,12 +16,14 @@
       line: "PermitEmptyPasswords no"
     - regexp: "^ChallengeResponseAuthentication"
       line: "ChallengeResponseAuthentication no"
+    - regexp: "^KbdInteractiveAuthentication"
+      line: "KbdInteractiveAuthentication no"
     - regexp: "^GSSAPIAuthentication"
       line: "GSSAPIAuthentication no"
     - regexp: "^X11Forwarding"
       line: "X11Forwarding no"
-    # - regexp:
-    #   line: "AuthorizedKeysFile .ssh/authorized_keys /etc/ssh/authorized_keys"
+    - regexp: "PermitRootLogin"
+      line: "PermitRootLogin no"
   notify:
     - Reload systemd
     - Restart ssh
@@ -28,7 +31,7 @@
 - name: Flush handlers
   ansible.builtin.meta: flush_handlers
 
-- name: Check whether ssh config template
+- name: Check whether to template ssh config
   ansible.builtin.stat:
     path: "{{ role_path }}/templates/{{ group_names[0] }}.config"
   delegate_to: localhost

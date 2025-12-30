@@ -1,7 +1,9 @@
+---
 - name: Restore firewall
   community.general.iptables_state:
     state: restored
     path: /etc/iptables/rules.v4
   async: "{{ ansible_timeout }}"
   poll: 0
+  become: true
   when: not ansible_check_mode

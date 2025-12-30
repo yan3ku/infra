@@ -8,8 +8,15 @@ Decisions:
 - I use iptables to manage my firewall, solutions like firewalld or ufw don't work with docker and writing rules myself makes them easy to manage.
   Here is my blog post explaining it: https://yaneko.net/posts/iptables101.html
 
+REQUIREMENTS:
+- ssh-copy-id -i key host
+- configure static IP either networkd or /etc/network/interfaces
+- fill group_vars/
+- put your ssh key into ssh-agent
 
 TODO:
-[ ] set dns and fix networkd
-[ ] setup crowdsec firewall bouncer itpables
-[ ] fix groups role with user interaction
+- [ ] setup crowdsec firewall bouncer itpables
+
+NOTES:
+mbsync
+docker when restarted fails because of DNS

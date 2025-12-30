@@ -1,3 +1,8 @@
 ---
 dependencies:
+  - role: ssh
+    vars:
+      user_name: root
+      user_home: /root/
+      ssh_copy_private_key: true
   - role: geerlingguy.docker

@@ -4,7 +4,7 @@
     name: restic
     state: present
 
-- name: Ensure known_hosts
+- name: Add host key for {{ backup_host }}
   ansible.builtin.known_hosts:
     name: "{{ backup_host }}"
     key: "{{ backup_host }} {{ backup_host_key }}"
@@ -19,11 +19,21 @@
     mode: "0750"
     state: directory
 
-- name: Restore from cloud
+- name: Check if docker-compose exists
+  ansible.builtin.stat:
+    path: "{{ confdir }}/docker-compose.yaml"
+  register: compose_file
+
+- name: Restore docker containers from {{ backup_repo }}
   ansible.builtin.command:
     cmd: "restic -r {{ backup_repo }} restore latest:{{ confdir }} --target {{ confdir }}"
     creates: "{{ confdir }}/docker-compose.yaml"
-    stdin: "{{ backup_passwd }}"
+  environment:
+    RESTIC_PASSWORD: "{{ backup_passwd }}"
+  when: not compose_file.stat.exists
+  async: "{{ ansible_check_mode | ternary(0, 10000) }}"
+  poll: 0
+  register: restic_sleeper
 
 - name: Ensure cron service is up
   ansible.builtin.service:

@@ -24,6 +24,7 @@
       vars:
         user_groups: ['users', 'sudo', 'docker']
         user_nopasswd_sudo: true
+    # private ssh keys are needed to pull backup
     - role: ssh
       vars:
         user_name: yaneko
@@ -33,18 +34,14 @@
         user_name: root
         user_home: /root/
         ssh_copy_private_key: true
-    - role: sshd
-    - role: gpg
-    - role: config
+    - role: backup  # starts async restic job
+    - role: sshd    # hardening ssh
+    - role: gpg     # transfer gpg keys to access secrets
+    - role: config  # user config
       become: true
       become_user: yaneko
       vars:
         user_git: git@github.com:yan3ku/config.git
-    # - role: networkd
-    #   vars:
-    #     ip_addr: 192.168.1.86/24
-    #     dns1: 8.8.8.8
-    #     dns2: 8.8.4.4
     - role: smartd
     - role: firewall
     - role: samba
@@ -53,4 +50,14 @@
       vars:
         wg_subnet: 10.0.0.0/24
     - role: geerlingguy.docker
-    - role: backup
+  tasks:
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+    - name: Restic status
+      ansible.builtin.async_status:
+        jid: "{{ restic_sleeper.ansible_job_id }}"
+      when: not ansible_check_mode and not compose_file.stat.exists
+      register: job_result
+      until: job_result.finished
+      retries: 1000
+      delay: 10

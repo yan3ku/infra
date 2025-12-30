@@ -4,5 +4,5 @@ Name=eth86
 [Network]
 Address={{ ip_addr }}
 Gateway={{ ip_addr | ipaddr('address') | regex_replace('(\.\d+)$', '.1') }}
-DNS={{ DNS1 }}
-DNS={{ DNS2 }}
+DNS={{ dns1 }}
+DNS={{ dns2 }}
