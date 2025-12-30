@@ -7,11 +7,11 @@
     group: "{{ user_name }}"
     mode: '0700'
 
-# - name: Add SSH public key to authorized_keys for {{ user_name }}
-#   ansible.posix.authorized_key:
-#     user: "{{ user_name }}"
-#     key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
-#     state: present
+- name: Add SSH public key to authorized_keys for {{ user_name }}
+  ansible.posix.authorized_key:
+    user: "{{ user_name }}"
+    key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+    state: present
 
 - name: Copy private SSH key for {{ user_name }}
   when: ssh_copy_private_key

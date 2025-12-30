@@ -2,16 +2,13 @@
 - name: Deploy VPN
   hosts: pararaid
   become: true
+  vars:
+    user_name: yaneko
   roles:
     - role: user
       vars:
-        user_name: yaneko
         user_nopasswd_sudo: true
         user_groups: ['users', 'sudo']
-    - role: sshd
-    - role: ssh
-      vars:
-        user_name: yaneko
     - role: firewall
       vars:
         lan_nets:
@@ -20,10 +17,5 @@
     - role: wireguard
       vars:
         wg_subnet: 10.0.0.0/24
-    - role: user
-      vars:
-        user_name: vault
-        user_home: /var/vault
     - role: ssh
-      vars:
-        user_name: vault
+    - role: sshd                # this permits root login so must be last

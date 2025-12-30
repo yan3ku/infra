@@ -20,6 +20,7 @@
           - fancontrol
     - role: groups
     - role: pool
+    - role: mvhome
     - role: user
       vars:
         user_groups: ['users', 'sudo', 'docker']

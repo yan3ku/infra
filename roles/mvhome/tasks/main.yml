@@ -1,0 +1,56 @@
+---
+- name: "Passwd entry for {{ user_name }}"
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ user_name }}"
+  register: user_check
+  ignore_errors: true
+
+- name: Getent user home
+  ansible.builtin.set_fact:
+    current_home: "{{ getent_passwd[user_name][4] }}"
+  when: not user_check.failed
+
+- name: Move user home directory to {{ user_home }}
+  when:
+    - not user_check.failed
+    - current_home != user_home
+  block:
+    - name: Create user home directory {{ user_home }}
+      ansible.builtin.file:
+        state: directory
+        path: "{{ user_home }}"
+        owner: "{{ user_name }}"
+        group: "{{ user_name }}"
+        mode: "0755"
+
+    - name: Ensure rsync
+      ansible.builtin.package:
+        name: rsync
+        state: present
+
+    - name: Sync old home to {{ user_home }}
+      ansible.posix.synchronize:
+        src: "/home/{{ user_name }}/"
+        dest: "{{ user_home }}/"
+        archive: true
+      delegate_to: "{{ inventory_hostname }}"
+
+    - name: Replace home path in /etc/passwd
+      ansible.builtin.replace:
+        path: /etc/passwd
+        regexp: '/home/{{ user_name }}'
+        replace: '{{ user_home }}'
+
+    - name: Remove old home directory at /home/{{ user_name }}
+      ansible.builtin.file:
+        path: "/home/{{ user_name }}"
+        state: absent
+
+    # changing home directory like this breaks gpg agent
+    # reseting connection nor restarting gpg agent fixes this
+    # only solution for now that worked is rebooting...
+    - name: Reboot the server
+      ansible.builtin.reboot:
+        msg: "Reboot initiated by Ansible"
+        reboot_timeout: 300

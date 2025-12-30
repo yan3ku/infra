@@ -3,3 +3,4 @@ user_nopasswd_sudo: false
 user_home: "/home/{{ user_name }}"
 user_shell: /bin/bash
 user_groups: []
+users_map: {}
