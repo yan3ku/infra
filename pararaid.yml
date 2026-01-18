@@ -5,6 +5,9 @@
   vars:
     user_name: yaneko
   roles:
+    - role: apt
+      packages:
+        - tcpdump
     - role: user
       vars:
         user_nopasswd_sudo: true
