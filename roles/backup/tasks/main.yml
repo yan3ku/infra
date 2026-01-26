@@ -50,7 +50,7 @@
     month: "*"
     weekday: "1"
     job: >
-      {{ confdir }}/docker-backup &&
+      make -C {{ confdir }} backup &&
       curl -fsS -m 10 --retry 5 -o /dev/null https://healthchecks.yaneko.net/ping/Ww46tNyjuhhr9MInNIxIPw/cron-docker-backup
 
 # - name: Pull docker images
