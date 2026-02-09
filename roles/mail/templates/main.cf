@@ -1,22 +1,48 @@
-myhostname = {{ ansible_hostname }}
+compatibility_level = 3.6
+
+myhostname = {{ ansible_hostname }}.{{ domain }}
 mydomain = {{ domain }}
+
+# posted on this machine and appended to unqualified recipient addresses
 myorigin = $mydomain
 
 # net access
-mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
-inet_interfaces = loopback-only
+inet_interfaces = 127.0.0.1, 172.20.0.1, 192.168.1.86
+mynetworks = 127.0.0.0/8
 
 # slash / is for maildir format
 home_mailbox = mail/
-mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+
+# what domains to receive mail for
+mydestination = $myhostname, localhost
+
+# rewrite addresses
+sender_canonical_maps = hash:/etc/postfix/sender_canonical
 
 # relay
-relayhost = [smtp.gmail.com]:587
-smtp_tls_security_level = may
+relayhost = [smtp.purelymail.com]:587
+
+# relay sasl
 smtp_sasl_auth_enable = yes
 smtp_sasl_security_options = noanonymous
 smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
 smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
 
-# rewrite addresses
-sender_canonical_maps = hash:/etc/postfix/sender_canonical
+# server sasl
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_security_options = noanonymous
+cyrus_sasl_config_path = /etc/postfix/sasl
+
+# security restrictions
+smtpd_relay_restrictions =
+    permit_mynetworks,
+    permit_sasl_authenticated,
+    defer_unauth_destination
+
+# tls
+smtp_tls_security_level  = encrypt
+smtpd_tls_security_level = encrypt
+smtp_tls_auth_only  = yes
+smtpd_tls_auth_only = yes
+smtpd_tls_cert_file = /opt/docker/swag/etc/letsencrypt/live/yaneko.net/fullchain.pem
+smtpd_tls_key_file  = /opt/docker/swag/etc/letsencrypt/live/yaneko.net/privkey.pem

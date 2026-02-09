@@ -4,6 +4,7 @@
     name:
       - postfix
       - libsasl2-modules
+      - sasl2-bin
     state: present
 
 - name: Template Postfix main.cf
@@ -46,5 +47,32 @@
 - name: Ensure Postfix is running
   ansible.builtin.service:
     name: postfix
+    state: started
+    enabled: true
+
+# sasl
+- name: Create Postfix SASL directory
+  ansible.builtin.file:
+    path: /etc/postfix/sasl
+    state: directory
+    mode: '0755'
+
+- name: Template smtpd.conf
+  ansible.builtin.template:
+    src: templates/sasl/smtpd.conf
+    dest: /etc/postfix/sasl/smtpd.conf
+    mode: '0644'
+  notify: Restart saslauthd
+
+- name: Configure saslauthd defaults (Enable Service)
+  ansible.builtin.lineinfile:
+    path: /etc/default/saslauthd
+    regexp: '^START='
+    line: 'START=yes'
+  notify: Restart saslauthd
+
+- name: Ensure saslauthd is started and enabled
+  ansible.builtin.service:
+    name: saslauthd
     state: started
     enabled: true

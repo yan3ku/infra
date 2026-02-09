@@ -1,2 +1,2 @@
-root {{ gmail_user }}
-{{ user_name }} {{ gmail_user }}
+root lab@{{ domain }}
+{{ user_name }} lab@{{ domain }}
