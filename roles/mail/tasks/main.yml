@@ -5,6 +5,8 @@
       - postfix
       - libsasl2-modules
       - sasl2-bin
+      - postfix-policyd-spf-python
+      - spamassassin
     state: present
 
 - name: Template Postfix main.cf
@@ -15,15 +17,42 @@
     backup: true
   notify: Reload postfix
 
+- name: Template Postfix master.cf
+  ansible.builtin.template:
+    src: templates/master.cf
+    dest: /etc/postfix/master.cf
+    mode: '0644'
+    backup: true
+  notify: Reload postfix
+
+- name: Create Postfix SASL directory
+  ansible.builtin.file:
+    path: /etc/postfix/sasl
+    state: directory
+    mode: '0755'
+
+- name: Add postfix user to the sasl group
+  ansible.builtin.user:
+    name: postfix
+    groups: sasl
+    append: yes
+
 - name: Template SASL password file
   ansible.builtin.template:
-    src: templates/sasl_passwd
-    dest: /etc/postfix/sasl_passwd
+    src: templates/sasl/passwd
+    dest: /etc/postfix/sasl/passwd
     owner: root
     group: root
     mode: '0600'
   register: sasl_file
-  notify: Postmap sasl_passwd
+  notify: Postmap sasl/passwd
+
+- name: Template smtpd.conf
+  ansible.builtin.template:
+    src: templates/sasl/smtpd.conf
+    dest: /etc/postfix/sasl/smtpd.conf
+    mode: '0644'
+  notify: Restart saslauthd
 
 - name: Template sender canonical maps
   ansible.builtin.template:
@@ -44,26 +73,7 @@
   changed_when: not aliases.stat.exists
   notify: Reload postfix
 
-- name: Ensure Postfix is running
-  ansible.builtin.service:
-    name: postfix
-    state: started
-    enabled: true
-
-# sasl
-- name: Create Postfix SASL directory
-  ansible.builtin.file:
-    path: /etc/postfix/sasl
-    state: directory
-    mode: '0755'
-
-- name: Template smtpd.conf
-  ansible.builtin.template:
-    src: templates/sasl/smtpd.conf
-    dest: /etc/postfix/sasl/smtpd.conf
-    mode: '0644'
-  notify: Restart saslauthd
-
+# saslauthd
 - name: Configure saslauthd defaults (Enable Service)
   ansible.builtin.lineinfile:
     path: /etc/default/saslauthd
@@ -74,5 +84,36 @@
 - name: Ensure saslauthd is started and enabled
   ansible.builtin.service:
     name: saslauthd
+    state: started
+    enabled: true
+
+- name: Create mountpoint for saslauthd in chroot
+  ansible.builtin.file:
+    path: /var/spool/postfix/var/run/saslauthd
+    state: directory
+    owner: root
+    group: sasl
+    mode: '0755'
+
+- name: Add saslauthd bind mount to fstab
+  ansible.posix.mount:
+    path: /var/spool/postfix/var/run/saslauthd
+    src: /var/run/saslauthd
+    fstype: none
+    opts: bind,defaults,nodev,nofail
+    state: mounted
+
+- name: Set sticky permission override for postfix var directory
+  ansible.builtin.command:
+    cmd: dpkg-statoverride --add root sasl 710 /var/spool/postfix/var
+  register: stat_result
+  changed_when: stat_result.rc == 0
+  failed_when:
+    - stat_result.rc != 0
+    - "'already exists' not in stat_result.stderr"
+
+- name: Ensure Postfix is running
+  ansible.builtin.service:
+    name: postfix
     state: started
     enabled: true

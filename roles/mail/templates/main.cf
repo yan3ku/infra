@@ -7,7 +7,8 @@ mydomain = {{ domain }}
 myorigin = $mydomain
 
 # net access
-inet_interfaces = 127.0.0.1, 172.20.0.1, 192.168.1.86
+# 127.0.0.1, 172.20.0.1, 192.168.1.86
+inet_interfaces = all
 mynetworks = 127.0.0.0/8
 
 # slash / is for maildir format
@@ -25,7 +26,7 @@ relayhost = [smtp.purelymail.com]:587
 # relay sasl
 smtp_sasl_auth_enable = yes
 smtp_sasl_security_options = noanonymous
-smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_password_maps = hash:/etc/postfix/sasl/passwd
 smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
 
 # server sasl
