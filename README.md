@@ -17,3 +17,4 @@ REQUIREMENTS:
 TODO:
 - [ ] setup crowdsec firewall bouncer itpables
 - [ ] mbsync
+- [ ] networking and /etc/hosts

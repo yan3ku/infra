@@ -43,7 +43,6 @@ smtpd_relay_restrictions =
 # tls
 smtp_tls_security_level  = encrypt
 smtpd_tls_security_level = encrypt
-smtp_tls_auth_only  = yes
 smtpd_tls_auth_only = yes
 smtpd_tls_cert_file = /opt/docker/swag/etc/letsencrypt/live/yaneko.net/fullchain.pem
 smtpd_tls_key_file  = /opt/docker/swag/etc/letsencrypt/live/yaneko.net/privkey.pem
