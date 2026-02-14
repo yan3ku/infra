@@ -3,3 +3,4 @@
   ansible.builtin.package:
     name: "{{ packages }}"
     state: present
+    update_cache: yes
