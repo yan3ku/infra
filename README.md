@@ -16,7 +16,4 @@ REQUIREMENTS:
 
 TODO:
 - [ ] setup crowdsec firewall bouncer itpables
-
-NOTES:
-mbsync
-docker when restarted fails because of DNS
+- [ ] mbsync
